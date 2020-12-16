@@ -23,3 +23,26 @@ def oligoDesign(sequence="ATCG", tem="", min=60, max=75, len_sticky=2):
 if __name__ == "__main__":
     # input string
     oligoDesign(sequence="abcde", tem="", min=2, max=3, len_sticky=2)
+
+"""
+Input:
+"abcabcabc"
+Output:
+(ab)(ca)(bc)(abc)
+(ab)(ca)(bca)(bc)
+(ab)(cab)(ca)(bc)
+(abc)(ab)(ca)(bc)
+(abc)(abc)(abc)
+"""
+
+def f(sequence="abc"*3, tem="", min=2, max=3):
+    if (len(sequence) >= min and len(sequence) <= max) or len(sequence) == 0:
+        print tem + "(" + sequence + ")"
+    for i in range(min, max+1, 1):
+        for j in range(-min, -max-1, -1):
+            oligo1 = sequence[:i]
+            oligo2 = sequence[j:]
+            remain = sequence[i:j]
+            x = tem + "(" + oligo1 + ")" + "(" + oligo2 + ")"
+            if len(remain) >= min or i + abs(j) == len(sequence):
+                f(sequence=remain, tem=x, min=min, max=max)

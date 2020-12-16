@@ -13,23 +13,4 @@ xrange() generator
 
 子片段
 
-```python
-def findCombinations(string, index, out):
-    if index == len(string):
-        print(out)
- 
-    for i in range(index, len(string), 1):
- 
-        # append substring formed by str[index, i] to output string
-        findCombinations(string, i + 1, out + "(" + string[index:i + 1] + ")")
- 
-# Driver Code
-if __name__ == "__main__":
- 
-    # input string
-    string = "abcd"
-    findCombinations(string, 0, "")
- 
-# This code is contributed by
-# sanjeev2552
-```
+[GeneArt](https://www.thermofisher.com/cn/zh/home/life-science/cloning/geneart-type-ii-assembly-kits.html?ef_id=Cj0KCQiA2uH-BRCCARIsAEeef3nQo7Ts8HyCmHL_4dk9iRTHvU5vsekEDzNTqLYiyLJngcpewAEUzKcaAvixEALw_wcB:G:s&s_kwcid=AL!3652!3!476186507209!p!!g!!bsai&cid=bid_mol_clo_r01_co_cp1358_pjt0000_bid00000_0se_gaw_nt_pur_con&gclid=Cj0KCQiA2uH-BRCCARIsAEeef3nQo7Ts8HyCmHL_4dk9iRTHvU5vsekEDzNTqLYiyLJngcpewAEUzKcaAvixEALw_wcB)

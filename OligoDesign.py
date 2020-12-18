@@ -1,11 +1,19 @@
 # -*- coding: UTF-8 -*-
 """
+    The method (invented by LJW) can synthesize nearly any DNA sequence, including sequences with high GC content,
+    low GC content and repeated regions. The synthesizing system contains an initial double-strand sequence, a group of oligos, enzymes
+    (DNA ligase, DNA polymerase and restriction enzyme) and buffer.
+
+    This script aims to design oligos. The output oligos have hairpin structure and restriction site.
+
     Goals:
-    1. 没有酶切位点
+    1. hairpin structure (reverse complement sequence)
+    没有酶切位点
     2. 没有避免位点
     3. 粘端唯一
     4. 长度合适 （借用他人算法）
     5. 符合deltaG要求 （借用他人算法）
+    6. A/B/C/D...片段之间有唯一重叠末端，可以连接
 
     ##### 拆成200bp
     ##### 对于200bp，添加wrap5和wrap3，拆分成60-75bp的片段（递归）

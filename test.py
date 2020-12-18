@@ -46,3 +46,5 @@ def f(sequence="abc"*3, tem="", min=2, max=3):
             x = tem + "(" + oligo1 + ")" + "(" + oligo2 + ")"
             if len(remain) >= min or i + abs(j) == len(sequence):
                 f(sequence=remain, tem=x, min=min, max=max)
+
+"AGGTCTCTCTCTCTCTGGTACCAATCTAGAGGATCCCTCGAGGATTATGTGGAAAAAAAGCACCGACTCGGTGCCACTTTTTCAAGTTGATAACGGACTAGCCTTATTTCAACTTGCTATGCTGTTTCCAGCATAGCTCTGAAACTGAGGCAGGCGGGGATGAAGTGCCACGGATCATCTGCACAACTCTTTTAAATCAGCTTTGATCTATGTGGATAGCCGAGGTAGAGACC"

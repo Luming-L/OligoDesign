@@ -10,13 +10,18 @@
     - The composition of a oligo: part of the targeted sequence (main body of each oligo),
     restriction site and reverse complement sequence (2-10 bases overhang in 3' end)
 
-    - main body length range (oligo)
-    - main body of oligos overlap with each other. the length of the overlap is n.
-    - no restriction site/avoid site in the main body
-
-    - length and position of reverse complement sequence
-    - unique overhang of each oligo in a group
-    - deltaG
+    split the targeted sequence:
+    - main body length range (min=40, max=50)
+    - main body overlap with each other (len_overlap=2)
+    determine restriction enzyme:
+    - restriction site/avoid site not in the main bodies (res="BtsI"/res="BsrDI")
+    construct oligos:
+    - division point, 5 oligos, (1,4)(2,3)(3,2)(4,1), positive/negative
+    - BtsI/BsrDI site
+    - reverse complement sequence length (rc_len=14)
+    - unique overhang of each oligo in a group (2)
+    others:
+    - deltaG, secondary structure 7-12 1.5kj
 
 
 

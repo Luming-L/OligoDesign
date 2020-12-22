@@ -35,7 +35,7 @@ Output:
 (abc)(abc)(abc)
 """
 
-def f(sequence="abc"*3, tem="", min=2, max=3):
+def f(sequence="abc"*3,  tem="", min=2, max=3):
     if (len(sequence) >= min and len(sequence) <= max) or len(sequence) == 0:
         print tem + "(" + sequence + ")"
     for i in range(min, max+1, 1):
@@ -47,4 +47,29 @@ def f(sequence="abc"*3, tem="", min=2, max=3):
             if len(remain) >= min or i + abs(j) == len(sequence):
                 f(sequence=remain, tem=x, min=min, max=max)
 
-"AGGTCTCTCTCTCTCTGGTACCAATCTAGAGGATCCCTCGAGGATTATGTGGAAAAAAAGCACCGACTCGGTGCCACTTTTTCAAGTTGATAACGGACTAGCCTTATTTCAACTTGCTATGCTGTTTCCAGCATAGCTCTGAAACTGAGGCAGGCGGGGATGAAGTGCCACGGATCATCTGCACAACTCTTTTAAATCAGCTTTGATCTATGTGGATAGCCGAGGTAGAGACC"
+x = "AGGTCTCTCTCTCTCTGGTACCAATCTAGAGGATCCCTCGAGGATTATGTGGAAAAAAAGCACCGACTCGGTGCCACTTTTTCAAGTTGATAACGGACTAGCCTTATTTCAACTTGCTATGCTGTTTCCAGCATAGCTCTGAAACTGAGGCAGGCGGGGATGAAGTGCCACGGATCATCTGCACAACTCTTTTAAATCAGCTTTGATCTATGTGGATAGCCGAGGTAGAGACC"
+
+def f(sequence="abc"*3,  tem=[], min=2, max=3):
+    if len(sequence) >= min and len(sequence) <= max:
+        print tem + [sequence]
+    elif len(sequence) == 0:
+        print tem
+
+    for i in range(min, max+1, 1):
+        for j in range(-min, -max-1, -1):
+            oligos = [sequence[:i], sequence[j:]]
+            remain = sequence[i:j]
+            if len(remain) >= min or i + abs(j) == len(sequence):
+                f(sequence=remain, tem=tem + oligos, min=min, max=max)
+
+x = [[0, 1], [7, 8], [2, 3], [4, 6]]
+y = {}
+y[0] = [0,1]
+y[7] = [7,8]
+y[2] = [2,3]
+y[4] = [4,6]
+y
+{0: [0, 1], 2: [2, 3], 4: [4, 6], 7: [7, 8]}
+y.keys()
+[0, 2, 4, 7]
+sorted(y.keys())

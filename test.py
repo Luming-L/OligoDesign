@@ -1,75 +1,61 @@
-def oligoDesign(sequence="ATCG", tem="", min=60, max=75, len_sticky=2):
-    """
-    Given a DNA sequence, generate a group of oligos
-    :param sequence: the DNA sequence
-    :param tem: oligos that has been generated
-    :param min: the max length of oligos
-    :param max: the minimum length of oligos
-    :param len_sticky: the length of sticky ends
-    :return: oligoGroup: a group of oligos
-    """
-    if sequence == "":
-        oligoGroup = tem
-        print(oligoGroup)
-    for i in range(1, len(sequence) + 1):
-        oligo = sequence[:i]
-        remain = sequence[i:]
-        x = tem + "(" + oligo + ")"
-        if len(oligo) >= min and len(oligo) <= max:
-            oligoDesign(sequence=remain, tem=x, min=min, max=max, len_sticky=len_sticky)
-
-
-
-if __name__ == "__main__":
-    # input string
-    oligoDesign(sequence="abcde", tem="", min=2, max=3, len_sticky=2)
-
-"""
-Input:
-"abcabcabc"
-Output:
-(ab)(ca)(bc)(abc)
-(ab)(ca)(bca)(bc)
-(ab)(cab)(ca)(bc)
-(abc)(ab)(ca)(bc)
-(abc)(abc)(abc)
-"""
-
-def f(sequence="abc"*3,  tem="", min=2, max=3):
-    if (len(sequence) >= min and len(sequence) <= max) or len(sequence) == 0:
-        print tem + "(" + sequence + ")"
+# -*- coding: UTF-8 -*-
+def f1(seq_range=[0, 8], min=2, max=3, tem=[], result=[]):
+    if seq_range[1] + 1 - seq_range[0] >= min and seq_range[1] + 1 - seq_range[0] <= max:
+        result.append(tem + [seq_range])
+    elif seq_range[1] + 1 - seq_range[0] == 0:
+        result.append(tem)
     for i in range(min, max+1, 1):
         for j in range(-min, -max-1, -1):
-            oligo1 = sequence[:i]
-            oligo2 = sequence[j:]
-            remain = sequence[i:j]
-            x = tem + "(" + oligo1 + ")" + "(" + oligo2 + ")"
-            if len(remain) >= min or i + abs(j) == len(sequence):
-                f(sequence=remain, tem=x, min=min, max=max)
+            oligos = [[seq_range[0], seq_range[0] + i - 1], [seq_range[1] + j + 1, seq_range[1]]]
+            remain = [seq_range[0] + i, seq_range[1] + j]
+            if remain[1] + 1 - remain[0] >= min or remain[1] + 1 - remain[0] == 0:
+                f1(seq_range=remain, min=min, max=max, tem=tem + oligos, result=result)
+    return result
 
-x = "AGGTCTCTCTCTCTCTGGTACCAATCTAGAGGATCCCTCGAGGATTATGTGGAAAAAAAGCACCGACTCGGTGCCACTTTTTCAAGTTGATAACGGACTAGCCTTATTTCAACTTGCTATGCTGTTTCCAGCATAGCTCTGAAACTGAGGCAGGCGGGGATGAAGTGCCACGGATCATCTGCACAACTCTTTTAAATCAGCTTTGATCTATGTGGATAGCCGAGGTAGAGACC"
+def list2dict(input=[]):
+    output = []
+    for i in range(len(input)):
+        tem = {}
+        for j in range(len(input[i])):
+            tem[input[i][j][0]] = input[i][j]
+        for index in range(1, len(tem.keys()) + 1):
+            tem[index] = tem.pop(sorted(tem.keys())[index - 1])
+        output.append(tem)
+    return output
 
-def f(sequence="abc"*3,  tem=[], min=2, max=3):
-    if len(sequence) >= min and len(sequence) <= max:
-        print tem + [sequence]
-    elif len(sequence) == 0:
-        print tem
+if __name__ == '__main__':
+    x = "AGGTCTCTCTCTCTCTGGTACCAATCTAGAGGATCCCTCGAGGATTATGTGGAAAAAAAGCACCGACTCGGTGCCACTTTTTCAAGTTGATAACGGACTAGCCTTATTTCAACTTGCTATGCTGTTTCCAGCATAGCTCTGAAACTGAGGCAGGCGGGGATGAAGTGCCACGGATCATCTGCACAACTCTTTTAAATCAGCTTTGATCTATGTGGATAGCCGAGGTAGAGACC"
+    results1 = f1(seq_range=[0, 8], min=2, max=3, tem=[], result=[])
+    results2 = list2dict(input=results1)
 
-    for i in range(min, max+1, 1):
-        for j in range(-min, -max-1, -1):
-            oligos = [sequence[:i], sequence[j:]]
-            remain = sequence[i:j]
-            if len(remain) >= min or i + abs(j) == len(sequence):
-                f(sequence=remain, tem=tem + oligos, min=min, max=max)
+    for i in range(len(results2)):
+        print "Group", i + 1, results2[i]
 
-x = [[0, 1], [7, 8], [2, 3], [4, 6]]
-y = {}
-y[0] = [0,1]
-y[7] = [7,8]
-y[2] = [2,3]
-y[4] = [4,6]
-y
-{0: [0, 1], 2: [2, 3], 4: [4, 6], 7: [7, 8]}
-y.keys()
-[0, 2, 4, 7]
-sorted(y.keys())
+
+
+
+# def f(sequence="abc"*3,  tem="", min=2, max=3):
+#     if (len(sequence) >= min and len(sequence) <= max) or len(sequence) == 0:
+#         print tem + "(" + sequence + ")"
+#     for i in range(min, max+1, 1):
+#         for j in range(-min, -max-1, -1):
+#             oligo1 = sequence[:i]
+#             oligo2 = sequence[j:]
+#             remain = sequence[i:j]
+#             x = tem + "(" + oligo1 + ")" + "(" + oligo2 + ")"
+#             if len(remain) >= min or i + abs(j) == len(sequence):
+#                 f(sequence=remain, tem=x, min=min, max=max)
+#
+# def f2(sequence="abc"*3,  tem=[], min=2, max=3):
+#     if len(sequence) >= min and len(sequence) <= max:
+#         print tem + [sequence]
+#     elif len(sequence) == 0:
+#         print tem
+#
+#     for i in range(min, max+1, 1):
+#         for j in range(-min, -max-1, -1):
+#             oligos = [sequence[:i], sequence[j:]]
+#             remain = sequence[i:j]
+#             if len(remain) >= min or i + abs(j) == len(sequence):
+#                 f2(sequence=remain, tem=tem + oligos, min=min, max=max)
+

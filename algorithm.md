@@ -20,7 +20,7 @@ xrange() generator
 
     拆分序列:
     1. 给定长度范围，把目标序列拆分为相互重叠的DNA短片段
-    Input: (sequence, max, min, overlap)
+    Input: (sequence, min, max)
     Output: (oligoGroups)
     - main body overlap with each other (len_overlap=2)
     determine restriction enzyme:
@@ -32,3 +32,16 @@ xrange() generator
     - unique overhang of each oligo in a group (2)
     其他:
     - deltaG, secondary structure 7-12 1.5kj
+
+
+x = [[0, 1], [7, 8], [2, 3], [4, 6]]
+y = {}
+y[0] = [0,1]
+y[7] = [7,8]
+y[2] = [2,3]
+y[4] = [4,6]
+y
+{0: [0, 1], 2: [2, 3], 4: [4, 6], 7: [7, 8]}
+y.keys()
+[0, 2, 4, 7]
+sorted(y.keys())

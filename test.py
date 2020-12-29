@@ -5,9 +5,7 @@
 import re
 from Bio.Seq import Seq
 
-
 REases = {"BtsI": 'GCAGTG', "BsrDI": 'GCAATG'}
-
 
 
 def f1(seq_range=[0, 8], min=2, max=3, tem=[], result=[]):
@@ -113,3 +111,9 @@ if __name__ == '__main__':
 #             remain = sequence[i:j]
 #             if len(remain) >= min or i + abs(j) == len(sequence):
 #                 f2(sequence=remain, tem=tem + oligos, min=min, max=max)
+
+results = [[[0, 1], [7, 8], [2, 3], [4, 6]], [[0, 1], [7, 8], [2, 4], [5, 6]], [[0, 1], [6, 8], [2, 3], [4, 5]],
+           [[0, 2], [7, 8], [3, 4], [5, 6]], [[0, 2], [6, 8], [3, 5]]]
+
+
+

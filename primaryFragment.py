@@ -24,15 +24,15 @@ class PrimaryFragment:
             :param maximum: int
         """
 
-        def break_a_sequence(seq_range, tem, results):
+        def break_a_sequence(seq_range, tem, result):
             """
             break a sequence
 
             :param seq_range: list, [first character index, last character index] of the sequence
             :param tem: list, store subSequences in each partition round
-            :param results: list, store possibilities of breaking the sequence
+            :param result: list, store possibilities of breaking the sequence
 
-            :rtype results: list, store all possibilities of breaking the sequence
+            :rtype result: list, store all possibilities of breaking the sequence
             """
 
             # the length of the remaining sequence
@@ -40,9 +40,9 @@ class PrimaryFragment:
 
             # the sequence has been broken completely
             if minimum <= remain_length <= maximum:
-                results.append(tem + [seq_range])
+                result.append(tem + [seq_range])
             elif remain_length == 0:
-                results.append(tem)
+                result.append(tem)
 
             # the sequence has not been broken completely
             else:
@@ -61,8 +61,8 @@ class PrimaryFragment:
                         remain_length = remain[1] + 1 - remain[0]  # the length of the remain
 
                         if remain_length >= minimum or remain_length == 0:  # start the next round of partition
-                            break_a_sequence(seq_range=remain, tem=tem + subSequences, results=results)
-            return results
+                            break_a_sequence(seq_range=remain, tem=tem + subSequences, results=result)
+            return result
 
         def format_results(results):
             """
@@ -89,35 +89,11 @@ class PrimaryFragment:
                 output.append(tem)  # append each possibility to the output
             return output
 
-        # generate all subSequences groups of the primary fragment
-        results_unformatted = break_a_sequence([0, len(self.sequence) - 1], [], [])
-        results_formatted = format_results(results_unformatted)
-        self.subSequences_groups = results_formatted
 
-        # print basic information of all subSequences groups
-        print "The length of the primary fragment is " + str(len(self.sequence)) + ".\n"
 
-        if len(self.subSequences_groups) == 0:
-            print "When the minimum and the maximum length of subSequences are " + str(minimum) + " and " + str(
-                maximum) + " respectively, the sequence cannot be broken.\n"
-        else:
-            print "When the minimum and the maximum length of subSequences are " + str(minimum) + " and " + str(
-                maximum) + " respectively, there are " + str(len(self.subSequences_groups)) + " possible ways to break the sequence.\n"
 
-            if len(self.subSequences_groups) == 1:
-                print "   The only way is " + str(self.subSequences_groups[0]) + "."
-            else:
-                print "   The first one is " + str(self.subSequences_groups[0]) + ".\n" \
-                    "   The last one is " + str(self.subSequences_groups[len(self.subSequences_groups) - 1]) + "."
 
-    def add_oligoGroup(self, oligoGroup):
-        """
-            put a feasible oligoGroup into self.oligoGroup
 
-            :param oligoGroup: a instance of OligoGroup class
-        """
-
-        self.oligoGroup = oligoGroup
 
 
 if __name__ == '__main__':
@@ -126,5 +102,8 @@ if __name__ == '__main__':
     y = "abcabcabc"
 
     primaryFragment_1 = PrimaryFragment(x)
-    primaryFragment_1.generate_subSequences(minimum=50, maximum=60)
+    primaryFragment_1.generate_subSequences(minimum=10, maximum=60)
     print len(primaryFragment_1.subSequences_groups)
+
+    primaryFragment_1.add_oligoGroup({})
+    print primaryFragment_1.oligoGroup

@@ -1,109 +1,132 @@
-# -*- coding: UTF-8 -*-
+# coding=utf-8
 __metaclass__ = type
+
+from Bio.Seq import Seq
 
 
 class PrimaryFragment:
     """primary fragment, can be synthesized by a group of oligos"""
 
-    def __init__(self, sequence):
-        self.sequence = sequence.replace(' ', '')
+    def __init__(self, original_sequence, wrap, iREase, vector):
+        self.original_sequence = original_sequence.replace(" ", "")
+        self.wrap = wrap
+        self.sequence = self.wrap.wrap5 + self.original_sequence + self.wrap.wrap3
+        self.iREase = iREase
+        self.vector = vector
+        self.division_point = None
+        self.rc_fragments_length = None
+        self.subSeq_group = None
+        self.oligo_group = None
 
-        # all possibilities of breaking the sequence given the length range of subSequences
-        # all possibilities are stored in a list, each possibility is a dict
-        self.subSequences_groups = None  # list
+    def change_division_point(self, new_division_point):
+        self.division_point = int(new_division_point)
 
-        # a feasible oligoGroup
-        self.oligoGroup = None  # OligoGroup class
+    def generate_oligos(self, minimum, maximum):
 
-    def generate_subSequences(self, minimum, maximum):
-        """
-            Given a sequence, minimum and maximum length of subSequences,
-            store all possibilities of breaking the sequence in self.subSequences_groups
-
-            :param minimum: int, minimum length of subSequences
-            :param maximum: int
-        """
-
-        def break_a_sequence(seq_range, tem, result):
-            """
-            break a sequence
-
-            :param seq_range: list, [first character index, last character index] of the sequence
-            :param tem: list, store subSequences in each partition round
-            :param result: list, store possibilities of breaking the sequence
-
-            :rtype result: list, store all possibilities of breaking the sequence
-            """
-
-            # the length of the remaining sequence
+        def backtrack(seq_range, tem):
             remain_length = seq_range[1] + 1 - seq_range[0]
+            if minimum <= remain_length <= maximum or remain_length == 0:
+                if minimum <= remain_length <= maximum:
+                    unformatted_subSeq_group = tem + [seq_range]
+                elif remain_length == 0:
+                    unformatted_subSeq_group = tem
+                if hairpins_are_valid(unformatted_subSeq_group):
+                    return True
+            for i in range(minimum, maximum + 1, 1):
+                for j in range(-minimum, -maximum - 1, -1):
+                    if not isValid(seq_range, i, j):
+                        continue
+                    subs = [[seq_range[0], seq_range[0] + i - 1],
+                            [seq_range[1] + j + 1, seq_range[1]]]
+                    seq_range = [seq_range[0] + i, seq_range[1] + j]  # do
+                    if backtrack(seq_range, tem=tem + subs):
+                        return True
+                    seq_range = [seq_range[0] - i, seq_range[1] - j]  # undo
+            return False
 
-            # the sequence has been broken completely
-            if minimum <= remain_length <= maximum:
-                result.append(tem + [seq_range])
-            elif remain_length == 0:
-                result.append(tem)
-
-            # the sequence has not been broken completely
+        def isValid(seq_range, i, j):
+            remain = [seq_range[0] + i, seq_range[1] + j]
+            remain_length = remain[1] + 1 - remain[0]
+            if remain_length >= minimum or remain_length == 0:
+                return True
             else:
-                for i in range(minimum, maximum + 1, 1):  # left partition, partition point iterates from min to max
-                    for j in range(-minimum, -maximum - 1,
-                                   -1):  # right partition, partition point iterates from min to max
+                return False
 
-                        # given a remaining sequence (seq_range), a left (i) and a right partition point (j),
-                        # generate 2 subSequences from left and right, respectively
-                        # the subSequence is represented by [first character index, last character index]
-                        subSequences = [[seq_range[0], seq_range[0] + i - 1],
-                                        [seq_range[1] + j + 1, seq_range[1]]]
+        def hairpins_are_valid(unformatted_subSeq_group):
 
-                        remain = [seq_range[0] + i,
-                                  seq_range[1] + j]  # the start and end index of the remaining sequence
-                        remain_length = remain[1] + 1 - remain[0]  # the length of the remain
+            def format_the_result(a_list):
+                a_dict = {}
+                for subSeq in range(len(a_list)):
+                    a_dict[a_list[subSeq][0]] = a_list[subSeq]
+                for new_key in range(1, len(a_dict) + 1):
+                    a_dict[new_key] = a_dict.pop(sorted(a_dict.keys())[new_key - 1])
+                return a_dict
 
-                        if remain_length >= minimum or remain_length == 0:  # start the next round of partition
-                            break_a_sequence(seq_range=remain, tem=tem + subSequences, results=result)
-            return result
+            def construct_hairpins(sequence, vector, subSeq_group, division_point, iREase):
+                hairpins = {}
 
-        def format_results(results):
-            """
-            format results, i.e. use a dict to store each possibility rather than a list
+                # make subSeqs overlapped
+                overlapped_subSeq_group = {len(subSeq_group): subSeq_group[len(subSeq_group)]}
+                for key in range(1, len(subSeq_group)):
+                    overlapped_subSeq_group[key] = [subSeq_group[key][0], subSeq_group[key][1] + iREase.cleave_location]
 
-            :param results: list, store all possibilities of breaking the sequence, each possibility is a list
+                # first half of subSeqs are in negative chain, second in positive
+                if division_point is None:  # calculate division point
+                    division_point = int(round(float(len(subSeq_group)) / 2))
+                for key in range(1, len(overlapped_subSeq_group) + 1):  # extract sequences in positive chain
+                    overlapped_subSeq_group[key] = sequence[overlapped_subSeq_group[key][0]:
+                                                            overlapped_subSeq_group[key][1] + 1]
+                for key in range(1, division_point + 1):  # half to negative, i.e.reverse complement
+                    overlapped_subSeq_group[key] = str(Seq(overlapped_subSeq_group[key]).reverse_complement())
 
-            :rtype output: list, store all possibilities of breaking the sequence, each possibility is a dict
-            """
-            output = []
-            for group in range(len(results)):  # iterate all possibilities of breaking the sequence
-                tem = {}  # use a dict to store a possibility
+                # calculate the length of rc fragments
+                rc_fragments_length = 14
 
-                for subSeq in range(
-                        len(results[group])):  # iterate all subSequences of a possibility, store them in a dict
-                    # in the temporary dict "tem", keys are start indices of subSequences and values are subSequences
-                    tem[results[group][subSeq][0]] = results[group][subSeq]
+                # construct hairpins
+                for key in range(1, len(overlapped_subSeq_group) + 1):
+                    if key == 1 or key == len(overlapped_subSeq_group):
+                        tem_frag = overlapped_subSeq_group[key][
+                                   -vector.sticky_end_length - rc_fragments_length:-vector.sticky_end_length]
+                    else:
+                        tem_frag = overlapped_subSeq_group[key][
+                                   -iREase.cleave_location - rc_fragments_length:-iREase.cleave_location]
 
-                for new_key in range(1, len(tem) + 1):  # iterate to change keys of "tem"
-                    # use the order of subSequence positions as new keys
-                    # sort old keys, pop items according to the order, change to new keys
-                    tem[new_key] = tem.pop(sorted(tem.keys())[new_key - 1])
+                    rc_fragment = str(Seq(tem_frag).reverse_complement())
+                    hairpins[key] = rc_fragment + iREase.recognition_site + overlapped_subSeq_group[key]
 
-                output.append(tem)  # append each possibility to the output
-            return output
+                return hairpins
 
+            def final_check(hairpins):
+                # unique sticky ends
+                all_sticky_ends = []
+                for key in range(1, len(hairpins) + 1):
+                    if key == 1 or key == len(hairpins):
+                        all_sticky_ends.append(hairpins[key][-self.vector.sticky_end_length:])
+                    else:
+                        all_sticky_ends.append(hairpins[key][-self.iREase.cleave_location:])
+                print all_sticky_ends
+                if len(set(all_sticky_ends)) == len(all_sticky_ends):
+                    print self.subSeq_group
+                    print self.oligo_group
+                    return True
+                else:
+                    self.subSeq_group = None
+                    self.oligo_group = None
+                    return False
 
+            self.subSeq_group = format_the_result(unformatted_subSeq_group)
 
+            self.oligo_group = construct_hairpins(sequence=self.sequence,
+                                                  vector=self.vector,
+                                                  subSeq_group=self.subSeq_group,
+                                                  division_point=self.division_point,
+                                                  iREase=self.iREase
+                                                  )
 
+            return final_check(self.oligo_group)
 
+        backtrack(seq_range=[0, len(self.sequence) - 1], tem=[])
 
+    def print_info(self):
+        return
 
-
-if __name__ == '__main__':
-    x = "AGGTCTCTCTCTCTCTGGTACCAATCTAGAGGATCCCTCGAGGATTATGTGGAAAAAAAGCACCGACTCGGTGCCACTTTTTCAAGTTGATAACGGACTAGCCTTATTTCAACTTGCTATGCTGTTTCCAGCATAGCTCTGAAACTGAGGCAGGCGGGGATGAAGTGCCACGGATCATCTGCACAACTCTTTTAAATCAGCTTTGATCTATGTGGATAGCCGAGGTAGAGACC   "
-
-    y = "abcabcabc"
-
-    primaryFragment_1 = PrimaryFragment(x)
-    primaryFragment_1.generate_subSequences(minimum=10, maximum=60)
-    print len(primaryFragment_1.subSequences_groups)
-
-    primaryFragment_1.add_oligoGroup({})
-    print primaryFragment_1.oligoGroup

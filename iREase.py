@@ -1,13 +1,17 @@
-# -*- coding: UTF-8 -*-
+# coding=utf-8
 __metaclass__ = type
 
 from Bio.Seq import Seq
 
 
-class Rease:
-    """REase: restriction enzyme"""
+class IREase:
+    """iREase: restriction enzyme"""
 
     def __init__(self, name, recognition_site, cleave_location):
+        """
+
+        :rtype: object
+        """
         self.name = name
         self.recognition_site = recognition_site
         self.cleave_location = cleave_location  # cleave at the downstream 2bp of the recognition site
@@ -30,7 +34,7 @@ class Rease:
 
 
 if __name__ == '__main__':
-    BtsI = Rease("BtsI", "GCAGTG", 2)
+    BtsI = IREase("BtsI", "GCAGTG", 2)
 
     test_seq1 = "GCAGTGTTT"
     test_seq2 = "CACTGCTTT"

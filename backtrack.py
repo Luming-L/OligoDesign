@@ -60,7 +60,7 @@ def break_a_sequence_v2(seq_range, minimum, maximum, tem, results):
     return results
 
 
-break_a_sequence_v2(seq_range=[0, 8], minimum=2, maximum=3, tem=[], results=[])
+break_a_sequence_v2(seq_range=[0, 247], minimum=45, maximum=50, tem=[], results=[])
 
 
 # version 3.0
@@ -95,4 +95,4 @@ def isValid(seq_range, minimum, i, j):
         return False
 
 
-backtrack(seq_range=[0, 8], minimum=2, maximum=3, tem=[])
+backtrack(seq_range=[0, 1599], minimum=200, maximum=200, tem=[])

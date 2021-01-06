@@ -53,7 +53,6 @@ class PrimaryFragment:
                 return False
 
         def hairpins_are_valid(unformatted_subSeq_group):
-
             def format_the_result(a_list):
                 a_dict = {}
                 for subSeq in range(len(a_list)):

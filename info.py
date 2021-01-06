@@ -126,7 +126,5 @@ for i in range(groupSize):
 
 
 
-# Output
-print oriSeq
-print oligoPositions
+
 

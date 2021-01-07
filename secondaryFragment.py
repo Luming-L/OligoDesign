@@ -15,10 +15,10 @@ class SecondaryFragment:
         self.iREase_set = iREase_set
         self.wrap_set = wrap_set
         self.vector = vector
-        self.subSeq_group = None
-        self.iREase_group = None
-        self.wrap_group = None
-        self.primaryFragment_group = None
+        self.subSeq_group = {}
+        self.iREase_group = {}
+        self.wrap_group = {}
+        self.primaryFragment_group = {}
 
     def generate_primaryFragments(self, minimum, maximum):
 
@@ -29,6 +29,7 @@ class SecondaryFragment:
                     unformatted_subSeq_group = tem + [seq_range]
                 elif remain_length == 0:
                     unformatted_subSeq_group = tem
+                print unformatted_subSeq_group
                 if primaryFragments_are_valid(unformatted_subSeq_group):
                     return True
             for i in range(minimum, maximum + 1, 1):
@@ -66,6 +67,7 @@ class SecondaryFragment:
                 for iREase in self.iREase_set:
                     if not iREase.find_recognition_site(primaryFragment):
                         iREase_usable = iREase
+                        break
                 return iREase_usable
 
             def determine_wrap(primaryFragment):
@@ -73,28 +75,31 @@ class SecondaryFragment:
                 for wrap in self.wrap_set:
                     if not wrap.find_recognition_site(primaryFragment):
                         wrap_usable = wrap
+                        break
                 return wrap_usable
 
             def check_and_instantiate_primaryFragments():
                 if None not in self.iREase_group.values() and None not in self.wrap_group.values():
                     for index in range(1, len(self.subSeq_group) + 1):
-                        self.primaryFragment_group[index] = PrimaryFragment(original_sequence=self.subSeq_group[index],
+                        container2 = self.sequence[self.subSeq_group[key][0]:self.subSeq_group[key][1] + 1]
+                        self.primaryFragment_group[index] = PrimaryFragment(original_sequence=container2,
                                                                             wrap=self.wrap_group[index],
                                                                             iREase=self.iREase_group[index],
                                                                             vector=self.vector)
                     return True
                 else:
-                    self.subSeq_group = None
-                    self.iREase_group = None
-                    self.wrap_group = None
+                    print "2"
+                    # self.subSeq_group = {}
+                    # self.iREase_group = {}
+                    # self.wrap_group = {}
                     return False
 
             self.subSeq_group = format_the_result(unformatted_subSeq_group)
+            print self.subSeq_group
 
             for key in range(1, len(self.subSeq_group) + 1):
-                self.iREase_group[key] = determine_iREase(self.subSeq_group[key])
-                self.wrap_group[key] = determine_wrap(self.subSeq_group[key])
-
+                container1 = self.sequence[self.subSeq_group[key][0]:self.subSeq_group[key][1] + 1]
+                self.iREase_group[key] = determine_iREase(container1)
+                self.wrap_group[key] = determine_wrap(container1)
             return check_and_instantiate_primaryFragments()
-
         backtrack([0, len(self.sequence) - 1], tem=[])

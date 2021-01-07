@@ -96,3 +96,24 @@ def isValid(seq_range, minimum, i, j):
 
 
 backtrack(seq_range=[0, 1599], minimum=200, maximum=200, tem=[])
+
+
+# BtsI_num = len(
+#     list(re.finditer(r'(?=GCAGTG|GTGACG|CACTGC|CGTCAC)',
+#                      str(oriSeq))))  # BtsI, oriSeq必须是string，pattern最好是raw string
+# BsrDI_num = len(list(re.finditer(r'(?=GCAATG|GTAACG|CATTGC|CGTTAC)', str(oriSeq))))  # BsrDI
+# print BtsI_num
+# print BsrDI_num
+#
+# for i in range(len(oligoGroups_starts) - 1):
+#     print "i", i
+#     # the first round
+#     if not BtsI_num and not BsrDI_num:  # no restriction sites
+#         print "no restriction sites"
+#     else:
+#         for site in re.finditer(r'(?=GCAGTG|GTGACG|CACTGC|CGTCAC)',
+#                                 str(oriSeq[oligoGroups_starts[i]:oligoGroups_starts[i + 1]])):
+#             BtsI_sites_starts.append(site.start())
+#         for site in re.finditer(r'(?=GCAATG|GTAACG|CATTGC|CGTTAC)',
+#                                 str(oriSeq[oligoGroups_starts[i]:oligoGroups_starts[i + 1]])):
+#             BsrDI_sites_starts.append(site.start())

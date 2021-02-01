@@ -1,31 +1,34 @@
-# coding=utf-8
-__metaclass__ = type
-
 from Bio.Seq import Seq
+from iREase import IREase
+from vector import Vector
+from wrap import Wrap
 
 
 class PrimaryFragment:
-    """primary fragment, can be synthesized by a group of oligos"""
+    """
+    primary fragment, can be synthesized by a group of oligos
+    length: 100 nt - 600 nt
+    """
 
     def __init__(self, original_sequence, wrap, iREase, vector):
         self.original_sequence = original_sequence.replace(" ", "")
         self.wrap = wrap
-        self.sequence = self.wrap.wrap5 + self.original_sequence + self.wrap.wrap3
         self.iREase = iREase
         self.vector = vector
         self.division_point = None
-        self.rc_fragments_length = None
+        self.rc_fragments_length = None  # the reverse complement fragment to form hairpin structure
         self.subSeq_group = None
         self.oligo_group = None
 
-    def change_division_point(self, new_division_point):
-        self.division_point = int(new_division_point)
-
     def generate_oligos(self, minimum, maximum):
+        """ generate oligos """
+        sequence = self.wrap.wrap5 + self.original_sequence + self.wrap.wrap3
 
         def backtrack(seq_range, tem):
+            """main sub function in generate_oligos"""
             remain_length = seq_range[1] + 1 - seq_range[0]
-            if minimum <= remain_length <= maximum or remain_length == 0:
+            if minimum <= remain_length <= maximum or remain_length == 0:  # means all subSequences meet the requirement
+                unformatted_subSeq_group = None
                 if minimum <= remain_length <= maximum:
                     unformatted_subSeq_group = tem + [seq_range]
                 elif remain_length == 0:
@@ -38,13 +41,14 @@ class PrimaryFragment:
                         continue
                     subs = [[seq_range[0], seq_range[0] + i - 1],
                             [seq_range[1] + j + 1, seq_range[1]]]
-                    seq_range = [seq_range[0] + i, seq_range[1] + j]  # do
+                    seq_range = [seq_range[0] + i, seq_range[1] + j]  # cut
                     if backtrack(seq_range, tem=tem + subs):
                         return True
-                    seq_range = [seq_range[0] - i, seq_range[1] - j]  # undo
+                    seq_range = [seq_range[0] - i, seq_range[1] - j]  # cancel
             return False
 
         def isValid(seq_range, i, j):
+            """ judge whether the remaining sequence is not less than than minimum """
             remain = [seq_range[0] + i, seq_range[1] + j]
             remain_length = remain[1] + 1 - remain[0]
             if remain_length >= minimum or remain_length == 0:
@@ -53,7 +57,9 @@ class PrimaryFragment:
                 return False
 
         def hairpins_are_valid(unformatted_subSeq_group):
+            """ construct hairpins and judge whether they are all valid """
             def format_the_result(a_list):
+                """ use a dict to represent a group of subSequences """
                 a_dict = {}
                 for subSeq in range(len(a_list)):
                     a_dict[a_list[subSeq][0]] = a_list[subSeq]
@@ -61,7 +67,8 @@ class PrimaryFragment:
                     a_dict[new_key] = a_dict.pop(sorted(a_dict.keys())[new_key - 1])
                 return a_dict
 
-            def construct_hairpins(sequence, vector, subSeq_group, division_point, iREase):
+            def construct_hairpins(seq, vector, subSeq_group, division_point, iREase):
+                """ construct hairpins """
                 hairpins = {}
 
                 # make subSeqs overlapped
@@ -70,11 +77,9 @@ class PrimaryFragment:
                     overlapped_subSeq_group[key] = [subSeq_group[key][0], subSeq_group[key][1] + iREase.cleave_location]
 
                 # first half of subSeqs are in negative chain, second in positive
-                if division_point is None:  # calculate division point
-                    division_point = int(round(float(len(subSeq_group)) / 2))
+                division_point = int(round(float(len(subSeq_group)) / 2))  # calculate division point
                 for key in range(1, len(overlapped_subSeq_group) + 1):  # extract sequences in positive chain
-                    overlapped_subSeq_group[key] = sequence[overlapped_subSeq_group[key][0]:
-                                                            overlapped_subSeq_group[key][1] + 1]
+                    overlapped_subSeq_group[key] = seq[overlapped_subSeq_group[key][0]:overlapped_subSeq_group[key][1] + 1]
                 for key in range(1, division_point + 1):  # half to negative, i.e.reverse complement
                     overlapped_subSeq_group[key] = str(Seq(overlapped_subSeq_group[key]).reverse_complement())
 
@@ -96,6 +101,7 @@ class PrimaryFragment:
                 return hairpins
 
             def final_check(hairpins):
+                """judge whether hairpins are all valid"""
                 # unique sticky ends
                 all_sticky_ends = []
                 for key in range(1, len(hairpins) + 1):
@@ -109,23 +115,40 @@ class PrimaryFragment:
                     print self.oligo_group
                     return True
                 else:
+                    self.division_point = None
+                    self.rc_fragments_length = None
                     self.subSeq_group = None
                     self.oligo_group = None
                     return False
 
             self.subSeq_group = format_the_result(unformatted_subSeq_group)
 
-            self.oligo_group = construct_hairpins(sequence=self.sequence,
+            self.oligo_group = construct_hairpins(seq=sequence,
                                                   vector=self.vector,
                                                   subSeq_group=self.subSeq_group,
                                                   division_point=self.division_point,
-                                                  iREase=self.iREase
-                                                  )
+                                                  iREase=self.iREase)
 
             return final_check(self.oligo_group)
 
-        backtrack(seq_range=[0, len(self.sequence) - 1], tem=[])
+        backtrack(seq_range=[0, len(sequence) - 1], tem=[])
 
-    def print_info(self):
-        return
 
+if __name__ == '__main__':
+    # the original sequence of primary fragment
+    pf_seq = "CTCTGGTACCAATCTAGAGGATCCCTCGAGGATTATGTGGAAAAAAAGCACCGACTCGGTGCCACTTTTTCAAGTTGATAACGGACTAGCCTTATTTCAACTTGCTATGCTGTTTCCAGCATAGCTCTGAAACTGAGGCAGGCGGGGATGAAGTGCCACGGATCATCTGCACAACTCTTTTAAATCAGCTTTGATCTATGTGGATAGCCGAGGTGGTACTAATACTAGTCTTTGTTGTCGTCCAATTGCGTA"
+
+    # wrap
+    BsaI = Wrap(name="BsaI", wrap5="AGGTCTCT", wrap3="AGAGACC", recognition_site="GGTCTC", cleave_location=4)
+
+    # iREase
+    BtsI = IREase(name="BtsI", recognition_site="GCAGTG", cleave_location=2)
+
+    # vector
+    vector1 = Vector(name="vector1", sticky_end_length=3)
+
+    # create a PF object
+    primaryFragment = PrimaryFragment(original_sequence=pf_seq, wrap=BsaI, iREase=BtsI, vector=vector1)
+
+    # generate oligos for a PF
+    primaryFragment.generate_oligos(minimum=40, maximum=50)

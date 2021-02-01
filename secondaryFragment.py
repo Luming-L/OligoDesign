@@ -1,13 +1,11 @@
-# coding=utf-8
-__metaclass__ = type
-
-from Bio.Seq import Seq
-
 from primaryFragment import PrimaryFragment
 
 
 class SecondaryFragment:
-    """secondary fragment, can be synthesized by a group of primary fragments"""
+    """
+    secondary fragment, can be synthesized by a group of primary fragments
+    length: 200 nt - 1500 nt
+    """
 
     def __init__(self, original_sequence, iREase_set, wrap_set, vector):
         self.original_sequence = original_sequence.replace(" ", "")

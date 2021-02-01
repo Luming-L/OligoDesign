@@ -117,3 +117,4 @@ backtrack(seq_range=[0, 1599], minimum=200, maximum=200, tem=[])
 #         for site in re.finditer(r'(?=GCAATG|GTAACG|CATTGC|CGTTAC)',
 #                                 str(oriSeq[oligoGroups_starts[i]:oligoGroups_starts[i + 1]])):
 #             BsrDI_sites_starts.append(site.start())
+

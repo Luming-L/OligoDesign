@@ -4,7 +4,7 @@ from primaryFragment import PrimaryFragment
 class SecondaryFragment:
     """
     secondary fragment, can be synthesized by a group of primary fragments
-    length: 200 nt - 1500 nt
+    length: 200 bases - 1500 bases
     """
 
     def __init__(self, original_sequence, iREase_set, wrap_set, vector):

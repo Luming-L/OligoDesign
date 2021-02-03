@@ -1,3 +1,4 @@
+import re
 from Bio.Seq import Seq
 
 
@@ -19,22 +20,22 @@ class Wrap:
         self.cleave_location = cleave_location  # the length of the sticky end after digestion
 
     def find_recognition_site(self, sequence):
-        """judge whether the sequence has sites that will be cleaved by the restriction enzyme"""
-        found = False
+        """ how many sites in the sequence that will be cleaved by the restriction enzyme """
 
-        sites = [self.recognition_site,  # the recognition site
-                 str(Seq(self.recognition_site).reverse_complement())]  # reverse complement sequence of the site
+        # the sequence and the reverse complement sequence of the site
+        regex = "(?=" + self.recognition_site + "|" + str(Seq(self.recognition_site).reverse_complement()) + ")"
 
-        for site in sites:
-            if sequence.find(site) != -1:
-                found = True
-                break
+        # find all sites, including sites overlapped
+        sites = list(re.finditer(regex, sequence))
 
-        return found
+        # the number of sites found
+        site_num = len(sites)
+
+        return site_num
 
 
 if __name__ == '__main__':
-    sequence = "ATCGGGTCTCATCGGAGACG"
+    sequence1 = "ATCGGGTCTCATCGGAGACGGTCTCGAGACCGAGACG"
 
     BsaI = Wrap(name="BsaI", wrap5="AGGTCTCT", wrap3="AGAGACC", recognition_site="GGTCTC", cleave_location=4)
     BsmBI = Wrap(name="BsmBI", wrap5="AGGCGTCTCT", wrap3="AGAGACGACC", recognition_site="CGTCTC", cleave_location=4)
@@ -49,6 +50,6 @@ if __name__ == '__main__':
           "\nwrap3 " + BsmBI.wrap3 + \
           "\nrecognition site " + BsmBI.recognition_site + " " + str(Seq(BsmBI.recognition_site).reverse_complement()) + "\n"
 
-    print "Does the sequence " + "'" + str(sequence) + "'" + " contain recognition site?"
-    print "BsaI: ", BsaI.find_recognition_site(sequence)
-    print "BsmBI: ", BsmBI.find_recognition_site(sequence)
+    print "Does the sequence " + "'" + str(sequence1) + "'" + " contain recognition site?"
+    print "BsaI: ", BsaI.find_recognition_site(sequence1)
+    print "BsmBI: ", BsmBI.find_recognition_site(sequence1)

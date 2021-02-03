@@ -1,3 +1,4 @@
+import re
 from Bio.Seq import Seq
 
 
@@ -10,22 +11,22 @@ class IREase:
         self.cleave_location = cleave_location  # the length of the sticky end after digestion
 
     def find_recognition_site(self, sequence):
-        """judge whether the sequence has sites that will be cleaved by the restriction enzyme"""
-        found = False
+        """ how many sites in the sequence that will be cleaved by the restriction enzyme """
 
-        sites = [self.recognition_site,  # the recognition site
-                 str(Seq(self.recognition_site).reverse_complement())]  # reverse complement sequence of the site
+        # the sequence and the reverse complement sequence of the site
+        regex = "(?=" + self.recognition_site + "|" + str(Seq(self.recognition_site).reverse_complement()) + ")"
 
-        for site in sites:
-            if sequence.find(site) != -1:
-                found = True
-                break
+        # find all sites, including sites overlapped
+        sites = list(re.finditer(regex, sequence))
 
-        return found
+        # the number of sites found
+        site_num = len(sites)
+
+        return site_num
 
 
 if __name__ == '__main__':
-    sequence = "GCAGTGTTTGTGACG"
+    sequence1 = "CACTGCGCAGTGCAGTGCAATGCATTGC"
 
     BtsI = IREase(name="BtsI", recognition_site="GCAGTG", cleave_location=2)
     BsrDI = IREase(name="BsrDI", recognition_site="GCAATG", cleave_location=2)
@@ -36,6 +37,6 @@ if __name__ == '__main__':
     print "iREase BsrDI:" + \
           "\nrecognition site " + BsrDI.recognition_site + " " + str(Seq(BsrDI.recognition_site).reverse_complement()) + "\n"
 
-    print "Does the sequence " + "'" + str(sequence) + "'" + " contain recognition site?"
-    print "BtsI: ", BtsI.find_recognition_site(sequence)
-    print "BsrDI: ", BsrDI.find_recognition_site(sequence)
+    print "Does the sequence " + "'" + str(sequence1) + "'" + " contain recognition site?"
+    print "BtsI: ", BtsI.find_recognition_site(sequence1)
+    print "BsrDI: ", BsrDI.find_recognition_site(sequence1)

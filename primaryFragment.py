@@ -34,12 +34,11 @@ class PrimaryFragment:
                 elif remain_length == 0:  # store the result
                     unformatted_subSeq_group = tem
                 if len(unformatted_subSeq_group) == size:  # certain group size
-                    print "Sequence breaking has been finished!"
                     if hairpins_are_valid(unformatted_subSeq_group):
+                        print "Sequence breaking has been finished!"
                         return True
             for i in range(minimum, maximum + 1, 1):
                 for j in range(-minimum, -maximum - 1, -1):
-                    print "i = " + str(i), "j = " + str(j)
                     if not isValid(seq_range, i, j):
                         continue
                     subs = [[seq_range[0], seq_range[0] + i - 1],
@@ -206,12 +205,6 @@ class PrimaryFragment:
 
 
 if __name__ == '__main__':
-    # configurations
-    primaryFragment_length_range = configs["primaryFragment_length_range"]
-    subSequence_length_range = configs["subSequence_length_range"]
-    reverse_complementary_length_range = configs["reverse_complementary_length_range"]
-    oligo_group_size_range = configs["oligo_group_size_range"]
-
     # the original sequence of primary fragment
     pf_seq = "AGGTCTCTTAGCTCTGAAACCTTCGAGCTCCACCGCTCCATGCCACGGATCATCTGCACAACTCTTTTAAATCAGCTTTGATCTATGTGGATAGCCGAGGTGGTACTAATACTAGTCTTTGTTGTCGTCCAATTGCGTAATGGGCCGGCCCATACTGCAATACATGTCCTGAAAGGCTTCATGGCCCACTACGAAATGCTAGAGAAGAGACC"
 

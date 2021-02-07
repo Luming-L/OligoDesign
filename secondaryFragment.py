@@ -30,9 +30,10 @@ class SecondaryFragment:
                     unformatted_subSeq_group = tem + [seq_range]
                 elif remain_length == 0:
                     unformatted_subSeq_group = tem
-                print unformatted_subSeq_group
-                if primaryFragments_are_valid(unformatted_subSeq_group):
-                    return True
+                if len(unformatted_subSeq_group) == size:  # certain group size
+                    print "Sequence breaking has been finished!"
+                    if primaryFragments_are_valid(unformatted_subSeq_group):
+                        return True
             for i in range(minimum, maximum + 1, 1):
                 for j in range(-minimum, -maximum - 1, -1):
                     if not isValid(seq_range, i, j):
@@ -52,6 +53,7 @@ class SecondaryFragment:
             if remain_length >= minimum or remain_length == 0:
                 return True
             else:
+                print "The remaining sequence is " + str(remain_length) + " bases. Not valid, go to next round."
                 return False
 
         def primaryFragments_are_valid(unformatted_subSeq_group):
@@ -64,6 +66,7 @@ class SecondaryFragment:
                     a_dict[a_list[i][0]] = a_list[i]
                 for i in range(1, len(a_dict) + 1):
                     a_dict[i] = a_dict.pop(sorted(a_dict.keys())[i - 1])
+                    print "subSeq " + str(i) + ":", str(a_dict[i][1] - a_dict[i][0] + 1) + " bases", a_dict[i]
                 return a_dict
 
             def determine_wrap(seq):
@@ -85,7 +88,6 @@ class SecondaryFragment:
                 return iREase_usable
 
             self.subSeq_group = format_the_result(unformatted_subSeq_group)
-            print "self.subSeq_group", self.subSeq_group
 
             # determine the wrap and the iREase for each PF sequence
             # initiate each PF object
@@ -99,6 +101,9 @@ class SecondaryFragment:
                                                                             wrap=wrap_of_pf,
                                                                             iREase=iREase_of_pf,
                                                                             vector=self.vectors[0])
+                        print "pf_seq", index, len(pf_seq), pf_seq
+                        print "wrap_of_pf", wrap_of_pf.name
+                        print "iREase_of_pf", iREase_of_pf.name
                     else:
                         self.primaryFragment_group = None
                         return False
@@ -147,9 +152,7 @@ if __name__ == '__main__':
     secondaryFragment1 = SecondaryFragment(original_sequence=sf_seq, vectors=all_vectors, wraps=all_wraps,
                                            iREases=all_iREases)
 
-    secondaryFragment1.generate_primaryFragments(minimum=200, maximum=210, size=4)
+    secondaryFragment1.generate_primaryFragments(minimum=120, maximum=210, size=4)
 
     for pf_object in secondaryFragment1.primaryFragment_group.values():
-        print pf_object
-
-
+        print pf_object.original_sequence

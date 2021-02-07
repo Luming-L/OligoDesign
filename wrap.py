@@ -19,7 +19,7 @@ class Wrap:
         self.recognition_site = recognition_site
         self.cleave_location = cleave_location  # the length of the sticky end after digestion
 
-    def find_recognition_site(self, sequence):
+    def count_recognition_site(self, sequence):
         """ how many sites in the sequence that will be cleaved by the restriction enzyme """
 
         # the sequence and the reverse complement sequence of the site
@@ -51,5 +51,6 @@ if __name__ == '__main__':
           "\nrecognition site " + BsmBI.recognition_site + " " + str(Seq(BsmBI.recognition_site).reverse_complement()) + "\n"
 
     print "Does the sequence " + "'" + str(sequence1) + "'" + " contain recognition site?"
-    print "BsaI: ", BsaI.find_recognition_site(sequence1)
-    print "BsmBI: ", BsmBI.find_recognition_site(sequence1)
+    print "BsaI: ", BsaI.count_recognition_site(sequence1)
+    print "BsmBI: ", BsmBI.count_recognition_site(sequence1)
+

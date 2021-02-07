@@ -10,7 +10,7 @@ class IREase:
         self.recognition_site = recognition_site
         self.cleave_location = cleave_location  # the length of the sticky end after digestion
 
-    def find_recognition_site(self, sequence):
+    def count_recognition_site(self, sequence):
         """ how many sites in the sequence that will be cleaved by the restriction enzyme """
 
         # the sequence and the reverse complement sequence of the site
@@ -38,5 +38,5 @@ if __name__ == '__main__':
           "\nrecognition site " + BsrDI.recognition_site + " " + str(Seq(BsrDI.recognition_site).reverse_complement()) + "\n"
 
     print "Does the sequence " + "'" + str(sequence1) + "'" + " contain recognition site?"
-    print "BtsI: ", BtsI.find_recognition_site(sequence1)
-    print "BsrDI: ", BsrDI.find_recognition_site(sequence1)
+    print "BtsI: ", BtsI.count_recognition_site(sequence1)
+    print "BsrDI: ", BsrDI.count_recognition_site(sequence1)

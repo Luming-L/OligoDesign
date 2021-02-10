@@ -12,144 +12,41 @@ class DesignError(Exception):
 
 
 # some functions
-def generate_primaryFragments_for_secondaryFragment(secondaryFragment):
-    """ generate primary fragments for secondaryFragment """
-
-    while True:
-        try:
-            sequence_length = len(secondaryFragment.original_sequence)
-
-            # prompt
-            print "The sequence is " + str(sequence_length) + \
-                  " bases, please input the subSequence group size, the minimum and maximum length of subSequences."
-            print "Three parameters above should meet these requirements: "
-            print "1. " + \
-                  str(primaryFragment_group_size_range[0]) + " <= size <= " + str(primaryFragment_group_size_range[1])
-            print "2. " + \
-                  str(primaryFragment_length_range[0]) + " <= minimum <= sequence_length/size <= maximum <= " + str(primaryFragment_length_range[1])
-
-            # input size
-            size_input = input("\nsize: ")
-            if type(size_input) == int and primaryFragment_group_size_range[0] <= size_input <= \
-                    primaryFragment_group_size_range[1]:
-                if primaryFragment_length_range[0] <= sequence_length / size_input <= primaryFragment_length_range[1]:
-                    print "sequence_length/size is " + str(sequence_length / size_input) + "."
-                else:
-                    raise DesignError
-            else:
-                raise DesignError
-
-            # input minimum
-            minimum_input = input("minimum: ")
-            if type(minimum_input) == int and primaryFragment_length_range[
-                0] <= minimum_input <= sequence_length / size_input:
-                pass
-            else:
-                raise DesignError
-
-            # input maximum
-            maximum_input = input("maximum: ")
-            if type(maximum_input) == int and sequence_length / size_input <= maximum_input <= \
-                    primaryFragment_length_range[1]:
-                pass
-            else:
-                raise DesignError
-
-            # prompt
-            if maximum_input - minimum_input > 10:
-                while True:
-                    selection = raw_input("maximum - minimum > 10, it may take a long time to break the sequence.\n"
-                                          "Do you want to continue? (yes/no)\n")
-                    if selection == "yes":
-                        break
-                    if selection == "no":
-                        raise DesignError
-
-            secondaryFragment.generate_primaryFragments(minimum=minimum_input, maximum=maximum_input, size=size_input)
-
+def generate_primaryFragments_for_secondaryFragment(secondaryFragment, group_size_range, subSequence_length_range):
+    """ generate a group of primaryFragments for secondaryFragment """
+    for group_size in range(group_size_range[0], group_size_range[1] + 1):
+        subSequence_length = int(len(secondaryFragment.original_sequence) / group_size)
+        step = 1
+        while subSequence_length_range[0] + step <= subSequence_length <= subSequence_length_range[1] - step:
+            secondaryFragment.generate_primaryFragments(minimum=subSequence_length - step,
+                                                        maximum=subSequence_length + step, size=group_size)
             if secondaryFragment.primaryFragment_group is None:
-                raise DesignError
-
-        except DesignError as e:
-            print e
-            print "Please try again!\n\n\n"
-
-        else:
-            break
-
-
-def generate_oligos_for_primaryFragment(primaryFragment):
-    """ generate oligos for primaryFragment """
-
-    while True:
-        try:
-            sequence_length = len(
-                primaryFragment.wrap.wrap5 + primaryFragment.original_sequence + primaryFragment.wrap.wrap3)
-
-            # prompt
-            print "The sequence is " + str(sequence_length) + \
-                  " bases, please input the subSequence group size, the minimum and maximum length of subSequences."
-            print "Three parameters above should meet these requirements: "
-            print "1. " + \
-                  str(oligo_group_size_range[0]) + " <= size <= " + str(oligo_group_size_range[1])
-            print "2. " + \
-                  str(subSequenceOfPF_length_range[0]) + " <= minimum <= sequence_length/size <= maximum <= " + str(
-                subSequenceOfPF_length_range[1])
-
-            # input size
-            size_input = input("\nsize: ")
-            if type(size_input) == int and oligo_group_size_range[0] <= size_input <= oligo_group_size_range[1]:
-                if subSequenceOfPF_length_range[0] <= sequence_length / size_input <= subSequenceOfPF_length_range[1]:
-                    print "sequence_length/size is " + str(sequence_length / size_input) + "."
-                else:
-                    raise DesignError
+                step = step + 1
             else:
-                raise DesignError
+                return True
+    return False
 
-            # input minimum
-            minimum_input = input("minimum: ")
-            if type(minimum_input) == int and subSequenceOfPF_length_range[
-                0] <= minimum_input <= sequence_length / size_input:
-                pass
-            else:
-                raise DesignError
 
-            # input maximum
-            maximum_input = input("maximum: ")
-            if type(maximum_input) == int and sequence_length / size_input <= maximum_input <= \
-                    subSequenceOfPF_length_range[
-                        1]:
-                pass
-            else:
-                raise DesignError
-
-            # prompt
-            if maximum_input - minimum_input > 10:
-                while True:
-                    selection = raw_input("maximum - minimum > 10, it may take a long time to break the sequence.\n"
-                                          "Do you want to continue? (yes/no)\n")
-                    if selection == "yes":
-                        break
-                    if selection == "no":
-                        raise DesignError
-
-            primaryFragment.generate_oligos(minimum=minimum_input, maximum=maximum_input, size=size_input)
-
+def generate_oligos_for_primaryFragment(primaryFragment, group_size_range, subSequence_length_range):
+    """ generate a group of oligos for primaryFragment """
+    for group_size in range(group_size_range[0], group_size_range[1] + 1):
+        subSequence_length = int(len(primaryFragment.original_sequence) / group_size)
+        step = 1
+        while subSequence_length_range[0] + step <= subSequence_length <= subSequence_length_range[1] - step:
+            primaryFragment.generate_oligos(minimum=subSequence_length - step, maximum=subSequence_length + step,
+                                            size=group_size)
             if primaryFragment.oligo_group is None:
-                raise DesignError
-
-        except (DesignError, NameError, SyntaxError) as e:
-            print e
-            print "Please try again!\n\n\n"
-
-        else:
-            break
+                step = step + 1
+            else:
+                return True
+    return False
 
 
 # configurations
-secondaryFragment_length_range = configs["secondaryFragment_length_range"]
+oligo_length_range = configs["oligo_length_range"]
+subSequence_of_primaryFragment_length_range = configs["subSequence_of_primaryFragment_length_range"]
 primaryFragment_length_range = configs["primaryFragment_length_range"]
-subSequenceOfPF_length_range = configs["subSequenceOfPF_length_range"]
+secondaryFragment_length_range = configs["secondaryFragment_length_range"]
 reverse_complementary_length_range = configs["reverse_complementary_length_range"]
 primaryFragment_group_size_range = configs["primaryFragment_group_size_range"]
 oligo_group_size_range = configs["oligo_group_size_range"]
@@ -184,21 +81,10 @@ with open("input.txt", "r") as f:
 
 sf = SecondaryFragment(original_sequence=sf_seq, vectors=all_vectors, wraps=all_wraps, iREases=all_iREases)
 
-generate_primaryFragments_for_secondaryFragment(sf)
+generate_primaryFragments_for_secondaryFragment(sf, primaryFragment_group_size_range, primaryFragment_length_range)
 
 for pf in sf.primaryFragment_group.values():
-    generate_oligos_for_primaryFragment(pf)
+    generate_oligos_for_primaryFragment(pf, oligo_group_size_range, subSequence_of_primaryFragment_length_range)
 
 for pf in sf.primaryFragment_group.values():
     print pf.oligo_group
-
-
-
-# for pf in range(1, len(secondaryFragment_1.primaryFragment_group) + 1):
-#     secondaryFragment_1.primaryFragment_group[pf].generate_oligos(37, 45)
-#     print len(secondaryFragment_1.primaryFragment_group[pf].original_sequence)
-# for pf in range(1, len(secondaryFragment_1.primaryFragment_group) + 1):
-#     print "primary fragment " + str(pf)
-#     # for index in sorted(secondaryFragment_1.primaryFragment_group[pf].oligo_group.keys()):
-#     #     print "oligo " + str(index) + ":" + secondaryFragment_1.primaryFragment_group[pf].oligo_group[index]
-#     print secondaryFragment_1.primaryFragment_group[pf].oligo_group

@@ -1,9 +1,13 @@
-configs = {"secondaryFragment_length_range": [100, 1500],
-           "primaryFragment_length_range": [50, 300],
-           "subSequenceOfPF_length_range": [15, 50],
+configs = {"oligo_length_range": [1, 70],  # the sequence can be synthesized by machine directly
+
+           "subSequence_of_primaryFragment_length_range": [15, 50],  # subSequence of primary fragment
+           "primaryFragment_length_range": [71, 300],  # subSequence of secondary fragment
+           "secondaryFragment_length_range": [301, 1500],
+
            "reverse_complementary_length_range": [6, 30],
-           "primaryFragment_group_size_range": [1, 10],
-           "oligo_group_size_range": [2, 8],
+
+           "primaryFragment_group_size_range": [2, 10],
+           "oligo_group_size_range": [2, 10],
 
            "vectors": [{"name": "vector1", "sticky_end_length": 3, "sticky_end1": "GGT", "sticky_end2": "AGG"}],
 

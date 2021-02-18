@@ -1,3 +1,5 @@
+import logging
+
 from config import configs
 from iREase import IREase
 from primaryFragment import PrimaryFragment
@@ -31,7 +33,6 @@ class SecondaryFragment:
                 elif remain_length == 0:
                     unformatted_subSeq_group = tem
                 if len(unformatted_subSeq_group) == size:  # certain group size
-                    print "Sequence breaking has been finished!"
                     if primaryFragments_are_valid(unformatted_subSeq_group):
                         return True
             for i in range(minimum, maximum + 1, 1):
@@ -53,7 +54,6 @@ class SecondaryFragment:
             if remain_length >= minimum or remain_length == 0:
                 return True
             else:
-                print "The remaining sequence is " + str(remain_length) + " bases. Not valid, go to next round."
                 return False
 
         def primaryFragments_are_valid(unformatted_subSeq_group):
@@ -66,7 +66,7 @@ class SecondaryFragment:
                     a_dict[a_list[i][0]] = a_list[i]
                 for i in range(1, len(a_dict) + 1):
                     a_dict[i] = a_dict.pop(sorted(a_dict.keys())[i - 1])
-                    print "subSeq " + str(i) + ":", str(a_dict[i][1] - a_dict[i][0] + 1) + " bases", a_dict[i]
+                    logging.info("subSeq " + str(i) + ": " + str(a_dict[i][1] - a_dict[i][0] + 1) + " bases " + str(a_dict[i]))
                 return a_dict
 
             def determine_wrap(seq):
@@ -91,6 +91,7 @@ class SecondaryFragment:
 
             # determine the wrap and the iREase for each PF sequence
             # initiate each PF object
+            logging.info("- initiating each PF object...")
             for index in range(1, len(self.subSeq_group) + 1):
                 pf_seq = self.original_sequence[self.subSeq_group[index][0]:self.subSeq_group[index][1] + 1]  # sequence of PF
                 wrap_of_pf = determine_wrap(pf_seq)  # wrap
@@ -101,9 +102,7 @@ class SecondaryFragment:
                                                                             wrap=wrap_of_pf,
                                                                             iREase=iREase_of_pf,
                                                                             vector=self.vectors[0])
-                        print "pf_seq", index, len(pf_seq), pf_seq
-                        print "wrap_of_pf", wrap_of_pf.name
-                        print "iREase_of_pf", iREase_of_pf.name
+                        logging.info("pf " + str(index) + ": " + "length_of_pf " + str(len(pf_seq)) + " bases" + "; " + "wrap_of_pf " + wrap_of_pf.name + "; " + "iREase_of_pf " + iREase_of_pf.name)
                     else:
                         self.primaryFragment_group = None
                         return False
@@ -113,6 +112,7 @@ class SecondaryFragment:
 
             return True
 
+        logging.info("- breaking the sequence of SF...")
         backtrack(seq_range=[0, len(self.original_sequence) - 1], tem=[])
 
 

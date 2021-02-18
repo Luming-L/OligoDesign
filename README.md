@@ -1,24 +1,25 @@
 # Design oligos
 This script aims to design oligos for gene synthesis. The gene synthesis method can be found in patent CN104212791A. The implementation is based on object-oriented programming.
 ## Definition
-oligo: a fragment can be synthesized by machine directly. Each oligo contains a reverse complement fragment, a reconstruction site, and a subSequence of the PF. The oligo can form hairpin structure.
+oligo: a fragment can be synthesized by machine directly. Each oligo used in this method contains a reverse complement fragment, a reconstruction site, and a subSequence of the PF. By the reverse complement fragment, the oligo can form hairpin structure.
 
 primary fragment (PF): a fragment can be synthesized by a group of oligos. A PF has its vector, wrap and iREase.
 
 secondary fragment (SF): a fragment can be synthesized by a group of primary fragments.
 ## Workflow
+Input a SF, output oligos.
 ### generate PFs for a SF
 - 1.break the sequence of SF
 - 2.determine wrap for each subSequence
-- 3.determine REase for each subSequence
+- 3.determine iREase for each subSequence
 - 4.initiate each PF object with its subSequence, vector, wrap and iREase
 ### generate oligos for a PF
-- 1.add wrap sequence to the sequence of PF
+- 1.add wrap sequences to the PF
 - 2.break the new sequence
 - 3.construct valid hairpins (oligos)
 - 3.1 make subSequences overlapped
-- 3.2 the first half of subSequences are in the negative chain, second in positive
-- 3.3 calculate the length of reverse complement fragments
+- 3.2 the first half of subSequences comes from the reverse complement sequence of PF (negative chain), the second comes from the sequence of PF (positive chain)
+- 3.3 calculate the length of reverse complement fragment for each subSequence
 - 3.4 ligate reverse complement fragments, reconstruction sites and subSequences
 - 3.5 judge whether hairpins are valid
 - 3.5 1 each only has one recognition site

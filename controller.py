@@ -4,6 +4,7 @@ from secondaryFragment import SecondaryFragment
 from wrap import Wrap
 from vector import Vector
 from config import configs
+import logging
 
 
 # custom Error class
@@ -42,6 +43,9 @@ def generate_oligos_for_primaryFragment(primaryFragment, group_size_range, subSe
     return False
 
 
+logging.basicConfig(level=logging.INFO, filename='oligoDesign.log')
+logging.info('STARTING PROGRAM')
+
 # configurations
 oligo_length_range = configs["oligo_length_range"]
 subSequence_of_primaryFragment_length_range = configs["subSequence_of_primaryFragment_length_range"]
@@ -76,15 +80,18 @@ for iREase in configs["iREases"]:
                               recognition_site=iREase["recognition_site"],
                               cleave_location=iREase["cleave_location"]))
 
-with open("input.txt", "r") as f:
-    sf_seq = f.read()
+sf_seq = raw_input("\nPlease input a sequence: \n")
 
 sf = SecondaryFragment(original_sequence=sf_seq, vectors=all_vectors, wraps=all_wraps, iREases=all_iREases)
 
+logging.info('\n############################## Step 1: Generate Primary Fragments for a Secondary Fragment ##############################')
 generate_primaryFragments_for_secondaryFragment(sf, primaryFragment_group_size_range, primaryFragment_length_range)
 
+logging.info('\n############################## Step 2: Generate oligos for each Primary Fragment ##############################')
 for pf in sf.primaryFragment_group.values():
     generate_oligos_for_primaryFragment(pf, oligo_group_size_range, subSequence_of_primaryFragment_length_range)
 
 for pf in sf.primaryFragment_group.values():
     print pf.oligo_group
+
+logging.info('\nENDING PROGRAM')

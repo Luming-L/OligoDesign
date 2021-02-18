@@ -1,3 +1,4 @@
+import logging
 from Bio.Seq import Seq
 from iREase import IREase
 from vector import Vector
@@ -22,6 +23,7 @@ class PrimaryFragment:
 
     def generate_oligos(self, minimum, maximum, size):
         """ generate oligos """
+
         sequence = self.wrap.wrap5 + self.original_sequence + self.wrap.wrap3
 
         def backtrack(seq_range, tem):
@@ -35,7 +37,7 @@ class PrimaryFragment:
                     unformatted_subSeq_group = tem
                 if len(unformatted_subSeq_group) == size:  # certain group size
                     if hairpins_are_valid(unformatted_subSeq_group):
-                        print "Sequence breaking has been finished!"
+                        logging.info("Got a group of valid hairpins!\n")
                         return True
             for i in range(minimum, maximum + 1, 1):
                 for j in range(-minimum, -maximum - 1, -1):
@@ -56,7 +58,6 @@ class PrimaryFragment:
             if remain_length >= minimum or remain_length == 0:
                 return True
             else:
-                print "The remaining sequence is " + str(remain_length) + " bases. Not valid, go to next round."
                 return False
 
         def hairpins_are_valid(unformatted_subSeq_group):
@@ -70,50 +71,38 @@ class PrimaryFragment:
                 for i in range(1, len(a_dict) + 1):
                     a_dict[i] = a_dict.pop(sorted(a_dict.keys())[i - 1])
                 for i in range(1, len(a_dict) + 1):
-                    print "subSeq " + str(i) + ":", str(a_dict[i][1] - a_dict[i][0] + 1) + " bases", a_dict[i]
+                    logging.info("subSeq " + str(i) + ": " + str(a_dict[i][1] - a_dict[i][0] + 1) + " bases " + str(a_dict[i]))
                 return a_dict
 
             def construct_hairpins(seq, vector, subSeq_group, iREase):
                 """ construct hairpins """
-                print "construct hairpins"
+                logging.info("- overlapping subSequences, and then getting the sequence of PF for subSequences...")
                 hairpins = {}
 
                 # make subSeqs overlapped
                 overlapped_subSeq_group = {len(subSeq_group): subSeq_group[len(subSeq_group)]}
                 for i in range(1, len(subSeq_group)):
                     overlapped_subSeq_group[i] = [subSeq_group[i][0], subSeq_group[i][1] + iREase.cleave_location]
-
-                print "make subSeqs overlapped"
-                for i in range(1, len(overlapped_subSeq_group) + 1):
-                    print "subSeq " + str(i) + ":", \
-                        str(overlapped_subSeq_group[i][1] - overlapped_subSeq_group[i][0] + 1) + " bases", \
-                        overlapped_subSeq_group[i]
-
-                # first half of subSequences are in negative chain, second in positive
-                print "first half of subSeqs are in negative chain, second in positive"
-                division_point = int(round(float(len(subSeq_group)) / 2))  # calculate division point
-                self.division_point = division_point
-                print "The division point is " + str(self.division_point) + "."
                 for i in range(1, len(overlapped_subSeq_group) + 1):  # extract sequences in positive chain
                     overlapped_subSeq_group[i] = seq[overlapped_subSeq_group[i][0]:overlapped_subSeq_group[i][1] + 1]
                 for i in range(1, len(overlapped_subSeq_group) + 1):
-                    print "subSeq " + str(i) + ":", \
-                        str(len(overlapped_subSeq_group[i])) + " bases", \
-                        overlapped_subSeq_group[i]
-                print ""
+                    logging.info("subSeq " + str(i) + ": " + str(len(overlapped_subSeq_group[i])) + " bases " + str(overlapped_subSeq_group[i]))
+
+                # first half of subSequences are in negative chain, second in positive
+                division_point = int(round(float(len(subSeq_group)) / 2))  # calculate division point
+                self.division_point = division_point
+                logging.info("- getting the reverse complement sequence of PF for the first half of subSequences...")
                 for i in range(1, division_point + 1):  # half to negative, i.e.reverse complement
                     overlapped_subSeq_group[i] = str(Seq(overlapped_subSeq_group[i]).reverse_complement())
 
                 for i in range(1, len(overlapped_subSeq_group) + 1):
-                    print "subSeq " + str(i) + ":", \
-                        str(len(overlapped_subSeq_group[i])) + " bases", \
-                        overlapped_subSeq_group[i]
+                    logging.info("subSeq " + str(i) + ": " + str(len(overlapped_subSeq_group[i])) + " bases " + overlapped_subSeq_group[i])
 
                 # calculate the length of reverse complement fragments
                 rc_fragments_length = 14
 
                 # construct hairpins: ligate reverse complement fragments, reconstruction sites and subSequences
-                print "hairpins are"
+                logging.info("- constructing hairpins...")
                 for i in range(1, len(overlapped_subSeq_group) + 1):
                     if i == 1 or i == len(overlapped_subSeq_group):  # rc fragments of first and last subSequences
                         tem_frag = overlapped_subSeq_group[i][
@@ -124,9 +113,7 @@ class PrimaryFragment:
 
                     rc_fragment = str(Seq(tem_frag).reverse_complement())
                     hairpins[i] = rc_fragment + iREase.recognition_site + overlapped_subSeq_group[i]
-                    print "oligo " + str(i) + ":", \
-                        str(len(hairpins[i])) + " bases", \
-                        rc_fragment + " " + iREase.recognition_site + " " + overlapped_subSeq_group[i]
+                    logging.info("oligo " + str(i) + ": " + str(len(hairpins[i])) + " bases " + rc_fragment + " " + iREase.recognition_site + " " + overlapped_subSeq_group[i])
 
                 return hairpins
 
@@ -140,10 +127,11 @@ class PrimaryFragment:
                     self.subSeq_group = None
                     self.oligo_group = None
 
+                logging.info("- checking hairpins...")
                 # all oligos only have one recognition site
                 for hairpin in hairpins.values():
                     if self.iREase.count_recognition_site(hairpin) != 1:
-                        print "More than one recognition site in the hairpin."
+                        logging.info("More than one recognition site in the hairpin. Failed!")
                         clean()
                         return False
 
@@ -154,8 +142,9 @@ class PrimaryFragment:
                         all_sticky_ends_of_hairpins.append(hairpins[i][-self.vector.sticky_end_length:])
                     else:  # other hairpins
                         all_sticky_ends_of_hairpins.append(hairpins[i][-self.iREase.cleave_location:])
-                print "all_sticky_ends_of_hairpins", all_sticky_ends_of_hairpins
+                logging.info("all_sticky_ends_of_hairpins: " + str(all_sticky_ends_of_hairpins))
                 if len(set(all_sticky_ends_of_hairpins)) != len(all_sticky_ends_of_hairpins):
+                    logging.info("sticky ends of hairpins are not unique. Failed!")
                     clean()
                     return False
 
@@ -170,8 +159,9 @@ class PrimaryFragment:
                     str(Seq(hairpins[1][-self.vector.sticky_end_length:]).reverse_complement()))
                 all_sticky_ends_of_inter_products.append(
                     str(Seq(hairpins[len(hairpins)][-self.vector.sticky_end_length:]).reverse_complement()))
-                print "all_sticky_ends_of_inter_products", all_sticky_ends_of_inter_products
+                logging.info("all_sticky_ends_of_inter_products: " + str(all_sticky_ends_of_inter_products))
                 if len(set(all_sticky_ends_of_inter_products)) != len(all_sticky_ends_of_inter_products):
+                    logging.info("sticky ends of intermediate products are not unique. Failed!")
                     clean()
                     return False
 
@@ -180,13 +170,14 @@ class PrimaryFragment:
                 left_sticky_ends_of_inter_products = all_sticky_ends_of_inter_products[self.division_point:-2]
                 right_sticky_ends_of_inter_products.append(all_sticky_ends_of_inter_products[-2])
                 left_sticky_ends_of_inter_products.append(all_sticky_ends_of_inter_products[-1])
-                print "right_sticky_ends_of_inter_products", right_sticky_ends_of_inter_products
-                print "left_sticky_ends_of_inter_products", left_sticky_ends_of_inter_products
+                logging.info("right_sticky_ends_of_inter_products: " + str(right_sticky_ends_of_inter_products))
+                logging.info("left_sticky_ends_of_inter_products: " + str(left_sticky_ends_of_inter_products))
 
                 for rseoip in right_sticky_ends_of_inter_products:
                     if str(Seq(rseoip).reverse_complement()) in left_sticky_ends_of_inter_products:
                         if not right_sticky_ends_of_inter_products.index(rseoip) == self.division_point - 1 and \
                                 left_sticky_ends_of_inter_products.index(str(Seq(rseoip).reverse_complement())) == 0:
+                            logging.info("intermediate products can be ligated. Failed!")
                             clean()
                             return False
 
@@ -201,6 +192,7 @@ class PrimaryFragment:
 
             return final_check(self.oligo_group)
 
+        logging.info("- adding wrap sequences to the PF (" + str(len(self.original_sequence)) + " bases),  and then breaking the new sequence...")
         backtrack(seq_range=[0, len(sequence) - 1], tem=[])
 
 

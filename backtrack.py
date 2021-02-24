@@ -95,9 +95,29 @@ def isValid(seq_range, minimum, i, j):
         return False
 
 
-backtrack(seq_range=[0, 1599], minimum=200, maximum=200, tem=[])
+backtrack(seq_range=[0, 247], minimum=45, maximum=50, tem=[])
 
 
+# version 4.0
+# recursion, return a generator
+# function isValid() is shown in version 3.0
+def generator(seq_range, minimum, maximum):
+    if seq_range[1] + 1 - seq_range[0] == 0:
+        yield []
+    elif minimum <= seq_range[1] + 1 - seq_range[0] <= maximum:
+        yield [seq_range]
+    else:
+        for i in range(minimum, maximum + 1, 1):
+            for j in range(-minimum, -maximum - 1, -1):
+                if not isValid(seq_range, minimum, i, j):
+                    continue
+                subs = [[seq_range[0], seq_range[0] + i - 1], [seq_range[1] + j + 1, seq_range[1]]]
+                for result in generator([seq_range[0] + i, seq_range[1] + j], minimum, maximum):
+                    yield result + subs
+
+
+list(generator(seq_range=[0, 8], minimum=2, maximum=3))
+list(generator(seq_range=[0, 247], minimum=45, maximum=50))
 # BtsI_num = len(
 #     list(re.finditer(r'(?=GCAGTG|GTGACG|CACTGC|CGTCAC)',
 #                      str(oriSeq))))  # BtsI, oriSeq必须是string，pattern最好是raw string
@@ -117,4 +137,3 @@ backtrack(seq_range=[0, 1599], minimum=200, maximum=200, tem=[])
 #         for site in re.finditer(r'(?=GCAATG|GTAACG|CATTGC|CGTTAC)',
 #                                 str(oriSeq[oligoGroups_starts[i]:oligoGroups_starts[i + 1]])):
 #             BsrDI_sites_starts.append(site.start())
-

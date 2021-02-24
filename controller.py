@@ -84,10 +84,12 @@ sf_seq = raw_input("\nPlease input a sequence: \n")
 
 sf = SecondaryFragment(original_sequence=sf_seq, vectors=all_vectors, wraps=all_wraps, iREases=all_iREases)
 
-logging.info('\n############################## Step 1: Generate Primary Fragments for a Secondary Fragment ##############################')
+logging.info(
+    '\n############################## Step 1: Generate Primary Fragments for a Secondary Fragment ##############################')
 generate_primaryFragments_for_secondaryFragment(sf, primaryFragment_group_size_range, primaryFragment_length_range)
 
-logging.info('\n############################## Step 2: Generate oligos for each Primary Fragment ##############################')
+logging.info(
+    '\n############################## Step 2: Generate oligos for each Primary Fragment ##############################')
 for pf in sf.primaryFragment_group.values():
     generate_oligos_for_primaryFragment(pf, oligo_group_size_range, subSequence_of_primaryFragment_length_range)
 
@@ -95,3 +97,21 @@ for pf in sf.primaryFragment_group.values():
     print pf.oligo_group
 
 logging.info('\nENDING PROGRAM')
+
+
+def fib(n):
+    if n == 1:
+        return 0
+    elif n == 2:
+        return 1
+    elif n > 2:
+        return fib(n - 1) + fib(n - 2)
+
+def fibs(n):
+    if n == 1:
+        yield (0,)
+    elif n == 2:
+        yield 0, 1
+    elif n > 2:
+        for sequence in fibs(n - 1):
+            yield sequence + (sequence[-1] + sequence[-2],)

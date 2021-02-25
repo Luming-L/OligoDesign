@@ -17,35 +17,30 @@ class SecondaryFragment:
         self.vectors = vectors
         self.wraps = wraps
         self.iREases = iREases
-        self.subSeq_group = {}
-        self.primaryFragment_group = {}
+        self.primaryFragments_generator = []
+        self.primaryFragments = {}
 
-    def generate_primaryFragments(self, minimum, maximum, size):
-        """ generate primary fragments """
+    def create_primaryFragments_generator(self, minimum, maximum):
 
-        def backtrack(seq_range, tem):
-            """main sub function in generate_primaryFragments"""
+        def generator(seq_range, container):
             remain_length = seq_range[1] + 1 - seq_range[0]
-            if minimum <= remain_length <= maximum or remain_length == 0:  # meet the termination condition
+            if remain_length == 0 or minimum <= remain_length <= maximum:  # the last subSeq
                 unformatted_subSeq_group = None
-                if minimum <= remain_length <= maximum:
-                    unformatted_subSeq_group = tem + [seq_range]
-                elif remain_length == 0:
-                    unformatted_subSeq_group = tem
-                if len(unformatted_subSeq_group) == size:  # certain group size
-                    if primaryFragments_are_valid(unformatted_subSeq_group):
-                        return True
-            for i in range(minimum, maximum + 1, 1):
-                for j in range(-minimum, -maximum - 1, -1):
-                    if not isValid(seq_range, i, j):
-                        continue
-                    subs = [[seq_range[0], seq_range[0] + i - 1],
-                            [seq_range[1] + j + 1, seq_range[1]]]
-                    seq_range = [seq_range[0] + i, seq_range[1] + j]  # do
-                    if backtrack(seq_range, tem=tem + subs):
-                        return True  # a result has been found
-                    seq_range = [seq_range[0] - i, seq_range[1] - j]  # undo
-            return False
+                if remain_length == 0:
+                    unformatted_subSeq_group = container
+                elif minimum <= remain_length <= maximum:
+                    unformatted_subSeq_group = container + [seq_range]
+                valid_primaryFragment_group = get_valid_primaryFragments(unformatted_subSeq_group)
+                if valid_primaryFragment_group is not None:
+                    yield valid_primaryFragment_group
+            else:
+                for i in range(minimum, maximum + 1, 1):
+                    for j in range(-minimum, -maximum - 1, -1):
+                        if not isValid(seq_range, i, j):
+                            continue
+                        subs = [[seq_range[0], seq_range[0] + i - 1], [seq_range[1] + j + 1, seq_range[1]]]
+                        for result in generator([seq_range[0] + i, seq_range[1] + j], container=container + subs):
+                            yield result
 
         def isValid(seq_range, i, j):
             """ judge whether the remaining sequence length is not less than than minimum """
@@ -56,7 +51,7 @@ class SecondaryFragment:
             else:
                 return False
 
-        def primaryFragments_are_valid(unformatted_subSeq_group):
+        def get_valid_primaryFragments(unformatted_subSeq_group):
             """ get valid primary fragments, each valid pf has a vector, a wrap and a iREase """
 
             def format_the_result(a_list):
@@ -66,7 +61,6 @@ class SecondaryFragment:
                     a_dict[a_list[i][0]] = a_list[i]
                 for i in range(1, len(a_dict) + 1):
                     a_dict[i] = a_dict.pop(sorted(a_dict.keys())[i - 1])
-                    logging.info("subSeq " + str(i) + ": " + str(a_dict[i][1] - a_dict[i][0] + 1) + " bases " + str(a_dict[i]))
                 return a_dict
 
             def determine_wrap(seq):
@@ -87,37 +81,36 @@ class SecondaryFragment:
                         break
                 return iREase_usable
 
-            self.subSeq_group = format_the_result(unformatted_subSeq_group)
+            subSeq_group = format_the_result(unformatted_subSeq_group)
+            primaryFragment_group = {}
 
             # determine the wrap and the iREase for each PF sequence
             # initiate each PF object
-            logging.info("- initiating each PF object...")
-            for index in range(1, len(self.subSeq_group) + 1):
-                pf_seq = self.original_sequence[self.subSeq_group[index][0]:self.subSeq_group[index][1] + 1]  # sequence of PF
+            for index in range(1, len(subSeq_group) + 1):
+                pf_seq = self.original_sequence[subSeq_group[index][0]:subSeq_group[index][1] + 1]  # sequence of PF
                 wrap_of_pf = determine_wrap(pf_seq)  # wrap
                 if wrap_of_pf is not None:
                     iREase_of_pf = determine_iREase(wrap_of_pf.wrap5 + pf_seq + wrap_of_pf.wrap3)  # iREase
                     if iREase_of_pf is not None:
-                        self.primaryFragment_group[index] = PrimaryFragment(original_sequence=pf_seq,
-                                                                            wrap=wrap_of_pf,
-                                                                            iREase=iREase_of_pf,
-                                                                            vector=self.vectors[0])
-                        logging.info("pf " + str(index) + ": " + "length_of_pf " + str(len(pf_seq)) + " bases" + "; " + "wrap_of_pf " + wrap_of_pf.name + "; " + "iREase_of_pf " + iREase_of_pf.name)
+                        primaryFragment_group[index] = PrimaryFragment(original_sequence=pf_seq,
+                                                                       wrap=wrap_of_pf,
+                                                                       iREase=iREase_of_pf,
+                                                                       vector=self.vectors[0])
                     else:
-                        self.primaryFragment_group = None
-                        return False
+                        return None
                 else:
-                    self.primaryFragment_group = None
-                    return False
+                    return None
 
-            return True
+            return primaryFragment_group
 
-        logging.info("- breaking the sequence of SF...")
-        backtrack(seq_range=[0, len(self.original_sequence) - 1], tem=[])
+        self.primaryFragments_generator = generator(seq_range=[0, len(self.original_sequence) - 1], container=[])
+        self.primaryFragments = {}
+
+    def next_primaryFragments(self):
+        self.primaryFragments = next(self.primaryFragments_generator)
 
 
 if __name__ == '__main__':
-
     # the original sequence of secondary fragment
     sf_seq = "CTCTGGTACCAATCTAGAGGATCCCTCGAGGATTATGTGGAAAAAAAGCACCGACTCGGTGCCACTTTTTCAAGTTGATAACGGACTAGCCTTATTTCAACTTGCTATGCTGTTTCCAGCATAGCTCTGAAACTGAGGCAGGCGGGGATGAAGTGCCACGGATCATCTGCACAACTCTTTTAAATCAGCTTTGATCTATGTGGATAGCCGAGGTGGTACTAATACTAGTCTTTGTTGTCGTCCAATTGCGTAATGGGCCGGCCCATACTGCAATACATGTCCTGAAAGGCTTCATGGCCCACTACGAAATGCTTTTCTCCTACAGTTTATCTTACTTCTTCACATCACGTGGTTTCCGACGTACCCAGTGTTCCCGGCTTCCAGCATTTGCTGGTAGCACCAGTAGAAGACGCCTGTCTTGTGCTATGGTCCCTGACTGCACATCTGATTCCTCCAAGATCCATGCATGCCTGATAACTTTAAGTTGCTTCAGAAGAACTTTAAGTGATCTGTTCGTATGTTTAAAGATTCCTTAATCGTCGAGGATTATGTGGAAAAAAAGCACCGACTCGGTGCCACTTTTTCAAGTTGATAACGGACTAGCCTTATTTCAACTTGCTATGCTGTTTCCAGCATAGCTCTGAAACCTTCGAGCTCCACCGCTCCATGCCACGGATCATCTGCACAACTCTTTTAAATCAGCTTTGATCTATGTGGATAGCCGAGGTGGTACTAATACTAGTCTTTGTTGTCGTCCAATTGCGTAATGGGCCGGCCCATACTGCAATACATGTCCTGAAAGGCTTCATGGCCCACTACGAAATGCT"
 
@@ -152,7 +145,14 @@ if __name__ == '__main__':
     secondaryFragment1 = SecondaryFragment(original_sequence=sf_seq, vectors=all_vectors, wraps=all_wraps,
                                            iREases=all_iREases)
 
-    secondaryFragment1.generate_primaryFragments(minimum=120, maximum=210, size=4)
+    secondaryFragment1.create_primaryFragments_generator(minimum=205, maximum=208)
 
-    for pf_object in secondaryFragment1.primaryFragment_group.values():
-        print pf_object.original_sequence
+    secondaryFragment1.next_primaryFragments()
+
+    for pf in secondaryFragment1.primaryFragments.values():
+        print pf.original_sequence
+
+    secondaryFragment1.next_primaryFragments()
+
+    for pf in secondaryFragment1.primaryFragments.values():
+        print pf.original_sequence

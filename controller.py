@@ -99,19 +99,4 @@ for pf in sf.primaryFragment_group.values():
 logging.info('\nENDING PROGRAM')
 
 
-def fib(n):
-    if n == 1:
-        return 0
-    elif n == 2:
-        return 1
-    elif n > 2:
-        return fib(n - 1) + fib(n - 2)
 
-def fibs(n):
-    if n == 1:
-        yield (0,)
-    elif n == 2:
-        yield 0, 1
-    elif n > 2:
-        for sequence in fibs(n - 1):
-            yield sequence + (sequence[-1] + sequence[-2],)

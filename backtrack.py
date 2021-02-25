@@ -98,10 +98,10 @@ def isValid(seq_range, minimum, i, j):
 backtrack(seq_range=[0, 247], minimum=45, maximum=50, tem=[])
 
 
-# version 4.0
+# version 4.1
 # recursion, return a generator
 # function isValid() is shown in version 3.0
-def generator(seq_range, minimum, maximum):
+def generator_v4_1(seq_range, minimum, maximum):
     if seq_range[1] + 1 - seq_range[0] == 0:
         yield []
     elif minimum <= seq_range[1] + 1 - seq_range[0] <= maximum:
@@ -112,12 +112,35 @@ def generator(seq_range, minimum, maximum):
                 if not isValid(seq_range, minimum, i, j):
                     continue
                 subs = [[seq_range[0], seq_range[0] + i - 1], [seq_range[1] + j + 1, seq_range[1]]]
-                for result in generator([seq_range[0] + i, seq_range[1] + j], minimum, maximum):
+                for result in generator_v4_1([seq_range[0] + i, seq_range[1] + j], minimum, maximum):
                     yield result + subs
 
 
-list(generator(seq_range=[0, 8], minimum=2, maximum=3))
-list(generator(seq_range=[0, 247], minimum=45, maximum=50))
+list(generator_v4_1(seq_range=[0, 8], minimum=2, maximum=3))
+list(generator_v4_1(seq_range=[0, 247], minimum=45, maximum=50))
+
+
+# version 4.2
+# recursion, return a generator
+# function isValid() is shown in version 3.0
+def generator_v4_2(seq_range, minimum, maximum, tem):
+    if seq_range[1] + 1 - seq_range[0] == 0:  # the last subSeq
+        yield tem
+    elif minimum <= seq_range[1] + 1 - seq_range[0] <= maximum:  # the last subSeq
+        yield tem + [seq_range]
+    else:
+        for i in range(minimum, maximum + 1, 1):
+            for j in range(-minimum, -maximum - 1, -1):
+                if not isValid(seq_range, minimum, i, j):
+                    continue
+                subs = [[seq_range[0], seq_range[0] + i - 1], [seq_range[1] + j + 1, seq_range[1]]]
+                for result in generator_v4_2([seq_range[0] + i, seq_range[1] + j], minimum, maximum, tem=tem + subs):
+                    print "result", result
+                    yield result
+
+
+list(generator_v4_2(seq_range=[0, 8], minimum=2, maximum=3, tem=[]))
+list(generator_v4_2(seq_range=[0, 247], minimum=45, maximum=50, tem=[]))
 # BtsI_num = len(
 #     list(re.finditer(r'(?=GCAGTG|GTGACG|CACTGC|CGTCAC)',
 #                      str(oriSeq))))  # BtsI, oriSeq必须是string，pattern最好是raw string

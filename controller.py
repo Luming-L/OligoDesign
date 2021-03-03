@@ -4,28 +4,24 @@ from secondaryFragment import SecondaryFragment
 from wrap import Wrap
 from vector import Vector
 from config import configs
-import logging
-
-
-# custom Error class
-class DesignError(Exception):
-    pass
 
 
 # some functions
 def generate_primaryFragments_for_secondaryFragment(secondaryFragment, group_size_range, subSequence_length_range):
     """ generate a group of primaryFragments for secondaryFragment """
     for group_size in range(group_size_range[0], group_size_range[1] + 1):
-        subSequence_length = int(len(secondaryFragment.original_sequence) / group_size)
+        subSequence_length = int(
+            len(secondaryFragment.original_sequence) / group_size)  # average subSeq length given certain group size
         step = 1
-        while subSequence_length_range[0] + step <= subSequence_length <= subSequence_length_range[1] - step:
-            secondaryFragment.generate_primaryFragments(minimum=subSequence_length - step,
-                                                        maximum=subSequence_length + step, size=group_size)
-            if secondaryFragment.primaryFragment_group is None:
+        while subSequence_length_range[0] + step <= subSequence_length <= subSequence_length_range[
+            1] - step and step < 11:
+            secondaryFragment.create_primaryFragments_generator(minimum=subSequence_length - step,
+                                                                maximum=subSequence_length + step,
+                                                                num=group_size)
+            if secondaryFragment.primaryFragments is None:
                 step = step + 1
             else:
-                return True
-    return False
+                return
 
 
 def generate_oligos_for_primaryFragment(primaryFragment, group_size_range, subSequence_length_range):
@@ -33,25 +29,22 @@ def generate_oligos_for_primaryFragment(primaryFragment, group_size_range, subSe
     for group_size in range(group_size_range[0], group_size_range[1] + 1):
         subSequence_length = int(len(primaryFragment.original_sequence) / group_size)
         step = 1
-        while subSequence_length_range[0] + step <= subSequence_length <= subSequence_length_range[1] - step:
-            primaryFragment.generate_oligos(minimum=subSequence_length - step, maximum=subSequence_length + step,
-                                            size=group_size)
-            if primaryFragment.oligo_group is None:
+        while subSequence_length_range[0] + step <= subSequence_length <= subSequence_length_range[
+            1] - step and step < 11:
+            primaryFragment.generate_oligos(minimum=subSequence_length - step,
+                                            maximum=subSequence_length + step,
+                                            num=group_size)
+            if primaryFragment.oligos is None:
                 step = step + 1
             else:
-                return True
-    return False
+                return
 
-
-logging.basicConfig(level=logging.INFO, filename='oligoDesign.log')
-logging.info('STARTING PROGRAM')
 
 # configurations
 oligo_length_range = configs["oligo_length_range"]
-subSequence_of_primaryFragment_length_range = configs["subSequence_of_primaryFragment_length_range"]
 primaryFragment_length_range = configs["primaryFragment_length_range"]
 secondaryFragment_length_range = configs["secondaryFragment_length_range"]
-reverse_complementary_length_range = configs["reverse_complementary_length_range"]
+default_reverse_complement_fragment_length = configs["default_reverse_complement_fragment_length"]
 primaryFragment_group_size_range = configs["primaryFragment_group_size_range"]
 oligo_group_size_range = configs["oligo_group_size_range"]
 
@@ -80,23 +73,38 @@ for iREase in configs["iREases"]:
                               recognition_site=iREase["recognition_site"],
                               cleave_location=iREase["cleave_location"]))
 
-sf_seq = raw_input("\nPlease input a sequence: \n")
+# input sequence
+input_seq = raw_input("\nPlease input a sequence: \n")
 
-sf = SecondaryFragment(original_sequence=sf_seq, vectors=all_vectors, wraps=all_wraps, iREases=all_iREases)
+# initialize a secondaryFragment object
+sf = SecondaryFragment(original_sequence=input_seq, vectors=all_vectors, wraps=all_wraps, iREases=all_iREases)
 
-logging.info(
-    '\n############################## Step 1: Generate Primary Fragments for a Secondary Fragment ##############################')
+# generate Primary Fragments
 generate_primaryFragments_for_secondaryFragment(sf, primaryFragment_group_size_range, primaryFragment_length_range)
 
-logging.info(
-    '\n############################## Step 2: Generate oligos for each Primary Fragment ##############################')
-for pf in sf.primaryFragment_group.values():
-    generate_oligos_for_primaryFragment(pf, oligo_group_size_range, subSequence_of_primaryFragment_length_range)
+# generate oligos
+while True:
+    try:
+        sf.next_primaryFragments()
+        for pf in sf.primaryFragments.values():
+            generate_oligos_for_primaryFragment(pf, oligo_group_size_range, [15, 50])
+            if pf.oligos is None:
+                raise Exception
+    except Exception as e:
+        if type(e) == StopIteration:
+            print "The oligos of the sequence should be designed manually."
+            break
+    else:
+        break
 
-for pf in sf.primaryFragment_group.values():
-    print pf.oligo_group
-
-logging.info('\nENDING PROGRAM')
-
-
+# results
+print "\nResults:"
+for i in sf.primaryFragments.keys():
+    print "\nprimary fragment " + str(i)
+    print "length: " + str(len(sf.primaryFragments[i].original_sequence))
+    print "wrap: " + sf.primaryFragments[i].wrap.name
+    print "iREase: " + sf.primaryFragments[i].iREase.name
+    print "vector: " + sf.primaryFragments[i].vector.name
+    for j in sf.primaryFragments[i].oligos:
+        print "oligo " + str(j) + ": " + sf.primaryFragments[i].oligos[j]
 

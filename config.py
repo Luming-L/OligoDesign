@@ -1,10 +1,8 @@
 configs = {"oligo_length_range": [1, 70],  # the sequence can be synthesized by machine directly
-
-           "subSequence_of_primaryFragment_length_range": [15, 50],  # subSequence of primary fragment
            "primaryFragment_length_range": [71, 300],  # subSequence of secondary fragment
            "secondaryFragment_length_range": [301, 1500],
 
-           "reverse_complementary_length_range": [6, 30],
+           "default_reverse_complement_fragment_length": 14,  # "reverse_complementary_length_range": [6, 30]
 
            "primaryFragment_group_size_range": [2, 10],
            "oligo_group_size_range": [2, 10],

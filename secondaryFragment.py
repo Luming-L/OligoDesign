@@ -1,5 +1,3 @@
-import logging
-
 from config import configs
 from iREase import IREase
 from primaryFragment import PrimaryFragment
@@ -17,12 +15,14 @@ class SecondaryFragment:
         self.vectors = vectors
         self.wraps = wraps
         self.iREases = iREases
-        self.primaryFragments_generator = []
+        self.primaryFragments_generator = []  # self.primaryFragments = next(self.primaryFragments_generator)
         self.primaryFragments = {}
 
-    def create_primaryFragments_generator(self, minimum, maximum):
+    def create_primaryFragments_generator(self, minimum, maximum, num):
+        """ create a generator to generate primary fragments """
 
         def generator(seq_range, container):
+            """ create a generator, main sub function in create_primaryFragments_generator """
             remain_length = seq_range[1] + 1 - seq_range[0]
             if remain_length == 0 or minimum <= remain_length <= maximum:  # the last subSeq
                 unformatted_subSeq_group = None
@@ -30,9 +30,10 @@ class SecondaryFragment:
                     unformatted_subSeq_group = container
                 elif minimum <= remain_length <= maximum:
                     unformatted_subSeq_group = container + [seq_range]
-                valid_primaryFragment_group = get_valid_primaryFragments(unformatted_subSeq_group)
-                if valid_primaryFragment_group is not None:
-                    yield valid_primaryFragment_group
+                if len(unformatted_subSeq_group) == num:
+                    valid_primaryFragment_group = get_valid_primaryFragments(unformatted_subSeq_group)
+                    if valid_primaryFragment_group is not None:
+                        yield valid_primaryFragment_group
             else:
                 for i in range(minimum, maximum + 1, 1):
                     for j in range(-minimum, -maximum - 1, -1):
@@ -106,7 +107,7 @@ class SecondaryFragment:
         self.primaryFragments_generator = generator(seq_range=[0, len(self.original_sequence) - 1], container=[])
         self.primaryFragments = {}
 
-    def next_primaryFragments(self):
+    def next_primaryFragments(self):  # use next(generator) to get primaryFragments
         self.primaryFragments = next(self.primaryFragments_generator)
 
 
@@ -142,17 +143,18 @@ if __name__ == '__main__':
                                   recognition_site=iREase["recognition_site"],
                                   cleave_location=iREase["cleave_location"]))
 
-    secondaryFragment1 = SecondaryFragment(original_sequence=sf_seq, vectors=all_vectors, wraps=all_wraps,
-                                           iREases=all_iREases)
+    secondaryFragment1 = SecondaryFragment(original_sequence=sf_seq, vectors=all_vectors, wraps=all_wraps, iREases=all_iREases)
 
-    secondaryFragment1.create_primaryFragments_generator(minimum=205, maximum=208)
-
-    secondaryFragment1.next_primaryFragments()
-
-    for pf in secondaryFragment1.primaryFragments.values():
-        print pf.original_sequence
+    secondaryFragment1.create_primaryFragments_generator(minimum=205, maximum=208, num=4)
 
     secondaryFragment1.next_primaryFragments()
 
     for pf in secondaryFragment1.primaryFragments.values():
-        print pf.original_sequence
+        print len(pf.original_sequence)
+
+    secondaryFragment1.next_primaryFragments()
+
+    print ""
+
+    for pf in secondaryFragment1.primaryFragments.values():
+        print len(pf.original_sequence)

@@ -80,7 +80,14 @@ input_seq = raw_input("\nPlease input a sequence: \n")
 sf = SecondaryFragment(original_sequence=input_seq, vectors=all_vectors, wraps=all_wraps, iREases=all_iREases)
 
 # generate Primary Fragments
-generate_primaryFragments_for_secondaryFragment(sf, primaryFragment_group_size_range, primaryFragment_length_range)
+if oligo_length_range[0] <= len(input_seq) <= oligo_length_range[1]:
+    print "The input sequence can be synthesized by machine directly."
+elif primaryFragment_length_range[0] <= len(input_seq) <= primaryFragment_length_range[1]:
+    generate_primaryFragments_for_secondaryFragment(sf, [1, 1], primaryFragment_length_range)
+elif secondaryFragment_length_range[0] <= len(input_seq) <= secondaryFragment_length_range[1]:
+    generate_primaryFragments_for_secondaryFragment(sf, primaryFragment_group_size_range, primaryFragment_length_range)
+elif len(input_seq) > secondaryFragment_length_range[1]:
+    print "The input sequence is too long."
 
 # generate oligos
 while True:

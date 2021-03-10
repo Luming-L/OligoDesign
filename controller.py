@@ -40,6 +40,22 @@ def generate_oligos_for_primaryFragment(primaryFragment, group_size_range, subSe
                 return
 
 
+def print_oligos(primaryFragment):
+    iREaseA = primaryFragment.iREase
+    vectorA = primaryFragment.vector
+    for index in primaryFragment.oligos.keys():
+        site1 = primaryFragment.oligos[index].find(iREaseA.recognition_site)
+        if index == 1 or index == len(primaryFragment.oligos):
+            site2 = -vectorA.sticky_end_length
+        else:
+            site2 = -iREaseA.cleave_location
+        print 'oligo ' + str(index) + ': ' + \
+              '\033[0;33m' + primaryFragment.oligos[index][:site1] + '\033[0m' + \
+              '\033[0;32m' + primaryFragment.oligos[index][site1:site1 + len(iREaseA.recognition_site)] + '\033[0m' + \
+              primaryFragment.oligos[index][site1 + len(iREaseA.recognition_site):site2] + \
+              '\033[0;31m' + primaryFragment.oligos[index][site2:] + '\033[0m'
+
+
 # configurations
 oligo_length_range = configs["oligo_length_range"]
 primaryFragment_length_range = configs["primaryFragment_length_range"]
@@ -109,9 +125,11 @@ print "\nResults:"
 for i in sf.primaryFragments.keys():
     print "\nprimary fragment " + str(i)
     print "length: " + str(len(sf.primaryFragments[i].original_sequence))
-    print "wrap: " + sf.primaryFragments[i].wrap.name
+    print "wrap5: " + sf.primaryFragments[i].wrap.wrap5 + "; wrap3: " + sf.primaryFragments[i].wrap.wrap3
     print "iREase: " + sf.primaryFragments[i].iREase.name
-    print "vector: " + sf.primaryFragments[i].vector.name
-    for j in sf.primaryFragments[i].oligos:
-        print "oligo " + str(j) + ": " + sf.primaryFragments[i].oligos[j]
+    print "vector sticky end1: " + sf.primaryFragments[i].vector.sticky_end1 + \
+          "; vector sticky end2: " + sf.primaryFragments[i].vector.sticky_end2
+    print_oligos(sf.primaryFragments[i])
+
+
 

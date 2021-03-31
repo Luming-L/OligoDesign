@@ -125,7 +125,7 @@ while sf.primaryFragments is not None:
         for pf in sf.primaryFragments.values():
             generate_oligos(pf, oligo_num_range, [15, 50])  # generate oligos for each PF
             if pf.oligos is None:
-                sf.next_primaryFragments() # if cannot generate oligos, get a new PF group
+                sf.next_primaryFragments()  # if cannot generate oligos, get a new PF group
                 raise Exception  # iterate PFs to generate oligos for each PF again
     except Exception as e:
         if type(e) == StopIteration:
@@ -145,6 +145,3 @@ if sf.primaryFragments is not None:
         print "vector sticky end1: " + sf.primaryFragments[i].vector.sticky_end1 + \
               "; vector sticky end2: " + sf.primaryFragments[i].vector.sticky_end2
         print_oligos(sf.primaryFragments[i])
-
-
-

@@ -4,8 +4,8 @@ configs = {"oligo_length_range": [1, 70],  # the sequence can be synthesized by 
 
            "default_reverse_complement_fragment_length": 14,  # "reverse_complementary_length_range": [6, 30]
 
-           "primaryFragment_group_size_range": [2, 10],
-           "oligo_group_size_range": [2, 10],
+           "primaryFragment_num_range": [2, 10],
+           "oligo_num_range": [2, 10],
 
            "vectors": [{"name": "vector1", "sticky_end_length": 3, "sticky_end1": "GGT", "sticky_end2": "AGG"}],
 

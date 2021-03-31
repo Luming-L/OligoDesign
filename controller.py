@@ -13,7 +13,8 @@ def generate_primaryFragments(secondaryFragment, subSeq_num_range, subSeq_length
         generate a group of primaryFragments.
     """
     for subSeq_num in range(subSeq_num_range[0], subSeq_num_range[1] + 1):
-        subSeq_length = int(len(secondaryFragment.original_sequence) / subSeq_num)  # average subSeq length given certain group size
+        # calculate average subSeq length given certain group size
+        subSeq_length = int(len(secondaryFragment.original_sequence) / subSeq_num)
         step = 1
         while subSeq_length_range[0] + step <= subSeq_length <= subSeq_length_range[1] - step and step < 11:
             secondaryFragment.create_primaryFragments_generator(minimum=subSeq_length - step,
@@ -66,8 +67,8 @@ oligo_length_range = configs["oligo_length_range"]
 primaryFragment_length_range = configs["primaryFragment_length_range"]
 secondaryFragment_length_range = configs["secondaryFragment_length_range"]
 default_reverse_complement_fragment_length = configs["default_reverse_complement_fragment_length"]
-primaryFragment_group_size_range = configs["primaryFragment_group_size_range"]
-oligo_group_size_range = configs["oligo_group_size_range"]
+primaryFragment_num_range = configs["primaryFragment_num_range"]
+oligo_num_range = configs["oligo_num_range"]
 
 all_vectors = []
 all_wraps = []
@@ -105,19 +106,23 @@ if oligo_length_range[0] <= len(input_seq) <= oligo_length_range[1]:
     print "The input sequence can be synthesized by machine directly."
 elif primaryFragment_length_range[0] <= len(input_seq) <= primaryFragment_length_range[1]:
     generate_primaryFragments(sf, [1, 1], primaryFragment_length_range)
+    if sf.primaryFragments is None:
+        print "The oligos of the sequence should be designed manually."
 elif secondaryFragment_length_range[0] <= len(input_seq) <= secondaryFragment_length_range[1]:
-    generate_primaryFragments(sf, primaryFragment_group_size_range, primaryFragment_length_range)
+    generate_primaryFragments(sf, primaryFragment_num_range, primaryFragment_length_range)
+    if sf.primaryFragments is None:
+        print "The oligos of the sequence should be designed manually."
 elif len(input_seq) > secondaryFragment_length_range[1]:
     print "The input sequence is too long."
 
 # generate oligos
-while True:
+while sf.primaryFragments is not None:
     try:
         for pf in sf.primaryFragments.values():
-            generate_oligos(pf, oligo_group_size_range, [15, 50])
+            generate_oligos(pf, oligo_num_range, [15, 50])  # generate oligos for each PF
             if pf.oligos is None:
-                sf.next_primaryFragments()
-                raise Exception
+                sf.next_primaryFragments() # if cannot generate oligos, get a new PF group
+                raise Exception  # iterate PFs to generate oligos for each PF again
     except Exception as e:
         if type(e) == StopIteration:
             print "The oligos of the sequence should be designed manually."
@@ -126,15 +131,16 @@ while True:
         break
 
 # results
-print "\nResults:"
-for i in sf.primaryFragments.keys():
-    print "\nprimary fragment " + str(i)
-    print "length: " + str(len(sf.primaryFragments[i].original_sequence))
-    print "wrap5: " + sf.primaryFragments[i].wrap.wrap5 + "; wrap3: " + sf.primaryFragments[i].wrap.wrap3
-    print "iREase: " + sf.primaryFragments[i].iREase.name
-    print "vector sticky end1: " + sf.primaryFragments[i].vector.sticky_end1 + \
-          "; vector sticky end2: " + sf.primaryFragments[i].vector.sticky_end2
-    print_oligos(sf.primaryFragments[i])
+if sf.primaryFragments is not None:
+    print "\nResults:"
+    for i in sf.primaryFragments.keys():
+        print "\nprimary fragment " + str(i)
+        print "length: " + str(len(sf.primaryFragments[i].original_sequence))
+        print "wrap5: " + sf.primaryFragments[i].wrap.wrap5 + "; wrap3: " + sf.primaryFragments[i].wrap.wrap3
+        print "iREase: " + sf.primaryFragments[i].iREase.name
+        print "vector sticky end1: " + sf.primaryFragments[i].vector.sticky_end1 + \
+              "; vector sticky end2: " + sf.primaryFragments[i].vector.sticky_end2
+        print_oligos(sf.primaryFragments[i])
 
 
 

@@ -13,14 +13,18 @@ def generate_primaryFragments(secondaryFragment, subSeq_num_range, subSeq_length
         generate a group of primaryFragments.
     """
     for subSeq_num in range(subSeq_num_range[0], subSeq_num_range[1] + 1):
-        # calculate average subSeq length given certain group size
+        # calculate the average subSeq length given certain number of subSeq
         subSeq_length = int(len(secondaryFragment.original_sequence) / subSeq_num)
+        # calculate minimum and maximum subSeq length when breaking secondaryFragment sequence
+        # minimum = subSeq_length - step, maximum=subSeq_length + step
         step = 1
+        # requirements: minimum => subSeq_num_range[0], maximum <= subSeq_num_range[1], maximum - minimum <= 10
         while subSeq_length_range[0] + step <= subSeq_length <= subSeq_length_range[1] - step and step < 11:
             secondaryFragment.create_primaryFragments_generator(minimum=subSeq_length - step,
                                                                 maximum=subSeq_length + step,
                                                                 num=subSeq_num)
             try:
+                # get PFs
                 secondaryFragment.next_primaryFragments()
             except StopIteration:
                 step = step + 1

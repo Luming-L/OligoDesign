@@ -13,12 +13,15 @@ def generate_primaryFragments_for_secondaryFragment(secondaryFragment, group_siz
         subSequence_length = int(
             len(secondaryFragment.original_sequence) / group_size)  # average subSeq length given certain group size
         step = 1
-        while subSequence_length_range[0] + step <= subSequence_length <= subSequence_length_range[
-            1] - step and step < 11:
+        while subSequence_length_range[0] + step <= subSequence_length <= subSequence_length_range[1] - step \
+                and step < 11:
+            print "step", step
             secondaryFragment.create_primaryFragments_generator(minimum=subSequence_length - step,
                                                                 maximum=subSequence_length + step,
                                                                 num=group_size)
-            if secondaryFragment.primaryFragments is None:
+            try:
+                secondaryFragment.next_primaryFragments()
+            except StopIteration:
                 step = step + 1
             else:
                 return
@@ -108,10 +111,10 @@ elif len(input_seq) > secondaryFragment_length_range[1]:
 # generate oligos
 while True:
     try:
-        sf.next_primaryFragments()
         for pf in sf.primaryFragments.values():
             generate_oligos_for_primaryFragment(pf, oligo_group_size_range, [15, 50])
             if pf.oligos is None:
+                sf.next_primaryFragments()
                 raise Exception
     except Exception as e:
         if type(e) == StopIteration:

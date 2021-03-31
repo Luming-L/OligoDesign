@@ -15,8 +15,8 @@ class SecondaryFragment:
         self.vectors = vectors
         self.wraps = wraps
         self.iREases = iREases
-        self.primaryFragments_generator = []  # self.primaryFragments = next(self.primaryFragments_generator)
-        self.primaryFragments = {}
+        self.primaryFragments_generator = None  # self.primaryFragments = next(self.primaryFragments_generator)
+        self.primaryFragments = None
 
     def create_primaryFragments_generator(self, minimum, maximum, num):
         """ create a generator to generate primary fragments """
@@ -105,7 +105,7 @@ class SecondaryFragment:
             return primaryFragment_group
 
         self.primaryFragments_generator = generator(seq_range=[0, len(self.original_sequence) - 1], container=[])
-        self.primaryFragments = {}
+        self.primaryFragments = None
 
     def next_primaryFragments(self):  # use next(generator) to get primaryFragments
         self.primaryFragments = next(self.primaryFragments_generator)

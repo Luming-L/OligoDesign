@@ -7,18 +7,18 @@ from config import configs
 
 
 # some functions
-def generate_primaryFragments_for_secondaryFragment(secondaryFragment, group_size_range, subSequence_length_range):
-    """ generate a group of primaryFragments for secondaryFragment """
-    for group_size in range(group_size_range[0], group_size_range[1] + 1):
-        subSequence_length = int(
-            len(secondaryFragment.original_sequence) / group_size)  # average subSeq length given certain group size
+def generate_primaryFragments(secondaryFragment, subSeq_num_range, subSeq_length_range):
+    """
+        Given a secondaryFragment object, range of subSequence number and range of subSequence length,
+        generate a group of primaryFragments.
+    """
+    for subSeq_num in range(subSeq_num_range[0], subSeq_num_range[1] + 1):
+        subSeq_length = int(len(secondaryFragment.original_sequence) / subSeq_num)  # average subSeq length given certain group size
         step = 1
-        while subSequence_length_range[0] + step <= subSequence_length <= subSequence_length_range[1] - step \
-                and step < 11:
-            print "step", step
-            secondaryFragment.create_primaryFragments_generator(minimum=subSequence_length - step,
-                                                                maximum=subSequence_length + step,
-                                                                num=group_size)
+        while subSeq_length_range[0] + step <= subSeq_length <= subSeq_length_range[1] - step and step < 11:
+            secondaryFragment.create_primaryFragments_generator(minimum=subSeq_length - step,
+                                                                maximum=subSeq_length + step,
+                                                                num=subSeq_num)
             try:
                 secondaryFragment.next_primaryFragments()
             except StopIteration:
@@ -27,16 +27,18 @@ def generate_primaryFragments_for_secondaryFragment(secondaryFragment, group_siz
                 return
 
 
-def generate_oligos_for_primaryFragment(primaryFragment, group_size_range, subSequence_length_range):
-    """ generate a group of oligos for primaryFragment """
-    for group_size in range(group_size_range[0], group_size_range[1] + 1):
-        subSequence_length = int(len(primaryFragment.original_sequence) / group_size)
+def generate_oligos(primaryFragment, subSeq_num_range, subSeq_length_range):
+    """
+        Given a primaryFragment object, range of subSequence number and range of subSequence length,
+        generate a group of oligos.
+    """
+    for subSeq_num in range(subSeq_num_range[0], subSeq_num_range[1] + 1):
+        subSeq_length = int(len(primaryFragment.original_sequence) / subSeq_num)
         step = 1
-        while subSequence_length_range[0] + step <= subSequence_length <= subSequence_length_range[
-            1] - step and step < 11:
-            primaryFragment.generate_oligos(minimum=subSequence_length - step,
-                                            maximum=subSequence_length + step,
-                                            num=group_size)
+        while subSeq_length_range[0] + step <= subSeq_length <= subSeq_length_range[1] - step and step < 11:
+            primaryFragment.generate_oligos(minimum=subSeq_length - step,
+                                            maximum=subSeq_length + step,
+                                            num=subSeq_num)
             if primaryFragment.oligos is None:
                 step = step + 1
             else:
@@ -102,9 +104,9 @@ sf = SecondaryFragment(original_sequence=input_seq, vectors=all_vectors, wraps=a
 if oligo_length_range[0] <= len(input_seq) <= oligo_length_range[1]:
     print "The input sequence can be synthesized by machine directly."
 elif primaryFragment_length_range[0] <= len(input_seq) <= primaryFragment_length_range[1]:
-    generate_primaryFragments_for_secondaryFragment(sf, [1, 1], primaryFragment_length_range)
+    generate_primaryFragments(sf, [1, 1], primaryFragment_length_range)
 elif secondaryFragment_length_range[0] <= len(input_seq) <= secondaryFragment_length_range[1]:
-    generate_primaryFragments_for_secondaryFragment(sf, primaryFragment_group_size_range, primaryFragment_length_range)
+    generate_primaryFragments(sf, primaryFragment_group_size_range, primaryFragment_length_range)
 elif len(input_seq) > secondaryFragment_length_range[1]:
     print "The input sequence is too long."
 
@@ -112,7 +114,7 @@ elif len(input_seq) > secondaryFragment_length_range[1]:
 while True:
     try:
         for pf in sf.primaryFragments.values():
-            generate_oligos_for_primaryFragment(pf, oligo_group_size_range, [15, 50])
+            generate_oligos(pf, oligo_group_size_range, [15, 50])
             if pf.oligos is None:
                 sf.next_primaryFragments()
                 raise Exception

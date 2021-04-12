@@ -1,6 +1,13 @@
 # Design oligos
-This script aims to design oligos for gene synthesis. The gene synthesis method can be found in patent CN104212791A. The implementation is based on object-oriented programming.
-## Definition
+This script aims to design oligos for gene synthesis. The gene synthesis method can be found in patent CN104212791A. You can find the latest version [here](https://github.com/Luming-L/OligoDesign).
+## Requirements
+- python 2.7
+- biopython
+- re
+## Usage
+- revise parameters in config.py
+- python OligoDesign/controller.py
+## Definitions
 oligo: a fragment can be synthesized by machine directly. Each oligo used in this method contains a reverse complement fragment, a restriction site, and a subSequence of the PF. By the reverse complement fragment, the oligo can form hairpin structure.
 
 primary fragment (PF): a fragment can be synthesized by a group of oligos. A PF has its vector, wrap and iREase.
@@ -36,7 +43,7 @@ iREase: restriction enzyme, is used to ligate oligos.
 - 3.5.3 sticky ends of intermediate products should be unique
 - 3.5.4 all intermediate products should not be ligated (the final product can be ligated)
 ## Pseudocode
-The core process in both "generate PFs" and "generate oligos" is breaking sequence. We use backtrack algorithm to do it. We also create a generator to store all possibilities of PFs. If oligos of a PF cannot be generated, we will next(generator) to get another group of PFs and generate oligos again.
+The core process in both "generate PFs" and "generate oligos" is breaking sequence. We use backtrack algorithm to do it. We also create a generator to store all possibilities of PFs. If oligos of a PF cannot be generated, we will `next(generator)` to get another group of PFs and generate oligos again.
 
 Ref: [break a string](https://www.geeksforgeeks.org/print-ways-break-string-bracket-form/)
 ### create PF generator
@@ -96,9 +103,3 @@ def hairpins_are_valid(subSeqs):
 ```
 ## To be continued
 deltaG, secondary structure 7-12 1.5kj
-
-
-
-    
-
-

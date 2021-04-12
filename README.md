@@ -6,7 +6,7 @@ This script aims to design oligos for gene synthesis. The gene synthesis method 
 - re
 ## Usage
 - revise parameters in config.py
-- python OligoDesign/controller.py
+- `python OligoDesign/controller.py`
 ## Definitions
 oligo: a fragment can be synthesized by machine directly. Each oligo used in this method contains a reverse complement fragment, a restriction site, and a subSequence of the PF. By the reverse complement fragment, the oligo can form hairpin structure.
 
